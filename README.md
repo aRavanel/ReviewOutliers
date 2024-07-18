@@ -54,7 +54,7 @@ EOL
 ## Clone the repo
 
 ```bash
-git clone https://github.com/abwaab/ReviewOutliers.git
+git clone https://github.com/aRavanel/ReviewOutliers.git
 ```
 
 # Run the app
@@ -76,6 +76,13 @@ To ensure consistency and code quality, please run the following checks locally 
 - Run Tests: `poetry run pytest`
 - Run Linting: `poetry run ruff .`
 - Run Formatting Check: `poetry run black --check .`
+
+Or use Make :
+
+- `make test`
+- `make lint`
+- `make format`
+- `make full`
 
 ## Production Deployment and Consistent Environments
 
