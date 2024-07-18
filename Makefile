@@ -7,7 +7,7 @@ test:
 	poetry run pytest
 
 lint:
-	poetry run ruff .
+	poetry run ruff check .
 
 format:
 	poetry run black .

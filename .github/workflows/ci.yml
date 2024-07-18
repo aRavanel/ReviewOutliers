@@ -24,7 +24,7 @@ jobs:
       #     run: poetry run pytest
 
       - name: Run linting
-        run: poetry run ruff .
+        run: poetry run ruff check .
 
       - name: Run formatting check
         run: poetry run black --check .
