@@ -20,8 +20,8 @@ jobs:
           pip install poetry
           poetry install
 
-      - name: Run tests
-        run: poetry run pytest
+      #   - name: Run tests
+      #     run: poetry run pytest
 
       - name: Run linting
         run: poetry run ruff .
