@@ -1,4 +1,3 @@
-
 import gzip
 import json
 from io import StringIO
@@ -13,12 +12,12 @@ import pandas as pd
 def read_json_lines(file_path: str, max_samples: int = 10_000) -> pd.DataFrame:
     """
     Function to read JSON Lines files and convert to DataFrame
-    When data is in  JSON Lines format (.jsonl), each line is a separate JSON object. 
+    When data is in  JSON Lines format (.jsonl), each line is a separate JSON object.
     -> should read the file line by line and parse each line as a JSON object, then concatenate them into a DataFrame.
     else get ValueError: Trailing data
     """
     data = []
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         for i, line in enumerate(tqdm(file, total=max_samples, desc="Reading lines")):
             if i >= max_samples:
                 break
@@ -33,12 +32,11 @@ def decompress_to_json(gz_filename, json_path):
     """
     # read lines one by one
     json_list = []
-    with gzip.open(gz_filename, 'rt', encoding='utf-8') as gz_file:
+    with gzip.open(gz_filename, "rt", encoding="utf-8") as gz_file:
         for line in gz_file:
             json_line = json.loads(line)
             json_list.append(json_line)
     # dumps it into json file
-    with open(json_path, 'w', encoding='utf-8') as json_file:
+    with open(json_path, "w", encoding="utf-8") as json_file:
         json.dump(json_list, json_file, indent=4)
     print(f"Decompressed and saved to {json_path}")
-    
