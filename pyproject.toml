@@ -19,6 +19,7 @@ pygwalker = "^0.4.9.1"
 ydata-profiling = "^4.9.0"
 tqdm = "^4.66.4"
 black = {extras = ["jupyter"], version = "^24.4.2"}
+sentence-transformers = "^3.0.1"
 
 [tool.poetry.dev-dependencies]
 black = "^24.4.0"
@@ -26,6 +27,7 @@ ruff = "^0.5.0"
 
 [tool.poetry.group.dev.dependencies]
 docker = "^7.1.0"
+jupyter-black = "^0.3.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
