@@ -3246,6 +3246,24 @@ snowflake = ["pandas", "pyarrow (==10.0.1)", "snowflake-sqlalchemy (==1.5.0)", "
 streamlit = ["streamlit"]
 
 [[package]]
+name = "pyod"
+version = "2.0.1"
+description = "A Comprehensive and Scalable Python Library for Outlier Detection (Anomaly Detection)"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pyod-2.0.1.tar.gz", hash = "sha256:8fc23333d3d5161d59aa7ed4ba02fd9f25d21adc96f72a9017ae931bd76b04b2"},
+]
+
+[package.dependencies]
+joblib = "*"
+matplotlib = "*"
+numba = ">=0.51"
+numpy = ">=1.19"
+scikit-learn = ">=0.22.0"
+scipy = ">=1.5.1"
+
+[[package]]
 name = "pyparsing"
 version = "3.1.2"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
@@ -5416,4 +5434,4 @@ unicode = ["tangled-up-in-unicode (==0.2.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.2"
-content-hash = "b7fb8cc763e09384dfc5c80bb8a5c5c0fce05527e454ec79c88cd7b80f9b3d30"
+content-hash = "0e6df4308ae86e1ec6177bf3a8862429de97fcf216e5e4cd75c43650f8b0c8bd"

@@ -28,6 +28,7 @@ ruff = "^0.5.0"
 [tool.poetry.group.dev.dependencies]
 docker = "^7.1.0"
 jupyter-black = "^0.3.4"
+pyod = "^2.0.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
