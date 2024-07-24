@@ -1,4 +1,4 @@
-.PHONY: install test lint format
+.PHONY: install test lint format run_docker
 
 install:
 	poetry install
@@ -15,3 +15,10 @@ format:
 full:
 	make lint
 	make format
+
+run_docker:
+	# Build the Docker image
+	docker build -t outlier-detection-api .
+
+	# Run the Docker container
+	docker run -d --name outlier-detection-api -p 8000:8000 outlier-detection-api
