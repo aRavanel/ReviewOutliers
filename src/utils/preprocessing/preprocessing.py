@@ -1,0 +1,30 @@
+import pandas as pd
+
+# module imports
+from src.utils.preprocessing.preprocessing_encoding import encode_data
+from src.utils.preprocessing.preprocessing_cleaning import clean_enrich_reviews, clean_enrich_metadata
+
+
+# ==========================================================================
+# Exported functions
+# ==========================================================================
+
+
+def preprocess_data(df_metadata: pd.DataFrame, df_review: pd.DataFrame, model, max_samples=10_000):
+    """ """
+
+    # clean data and create features
+    df_metadata = clean_enrich_metadata(df_metadata)
+    df_review = clean_enrich_reviews(df_review)
+
+    # Merge the datasets on 'parent_asin' with suffixes for duplicate columns
+    merged_df = pd.merge(df_review, df_metadata, on="parent_asin", how="inner", suffixes=("_review", "_metadata"))
+    merged_df = merged_df.drop(columns=["parent_asin", "asin"])  # those features will be OOD at inference for new data
+
+    # limit to wanted sample size, random_state for reproducibility
+    merged_df = merged_df.sample(n=max_samples, random_state=42)
+
+    # encode the data
+    combined_df = encode_data(merged_df, model=model)
+
+    return combined_df
