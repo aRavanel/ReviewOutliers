@@ -1,4 +1,5 @@
 import os
+from typing import Any
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
@@ -9,25 +10,22 @@ import pickle
 # ==========================================================================
 
 
-def save_encoder(encoder, file_name):
+def save_encoder(encoder, file_name: str) -> None:
     """Save the encoder as a pickle file."""
     with open(file_name, "wb") as encoder_file:
         pickle.dump(encoder, encoder_file)
 
 
-def load_encoder(file_name):
+def load_encoder(file_name: str) -> Any:
     """Load the encoder from a pickle file."""
     with open(file_name, "rb") as encoder_file:
         return pickle.load(encoder_file)
 
 
-# ==========================================================================
-# Exported functions
-# ==========================================================================
-
-
-def encode_numerical(merged_df, save_encoders=False, load_encoders=False, encoder_path=None):
-    """Scale numerical data: remove the mean and scale to unit variance."""
+def encode_numerical(merged_df: pd.DataFrame, save_encoders: bool = False, load_encoders: bool = False, encoder_path=None):
+    """
+    Scale numerical data: remove the mean and scale to unit variance.
+    """
     numerical_features = merged_df.select_dtypes(include=["number"]).columns.tolist()
 
     if load_encoders and encoder_path:
@@ -43,7 +41,9 @@ def encode_numerical(merged_df, save_encoders=False, load_encoders=False, encode
     return X_numerical_standardized
 
 
-def encode_categorical(merged_df: pd.DataFrame, save_encoders=False, load_encoders=False, encoder_path=None):
+def encode_categorical(
+    merged_df: pd.DataFrame, save_encoders: bool = False, load_encoders: bool = False, encoder_path=None
+):
     """Encode categorical features and scale them to have unit variance."""
     categorical_features = merged_df.select_dtypes(include=["category", "bool"]).columns.tolist()
     X_categorical_scaled = []
@@ -59,19 +59,25 @@ def encode_categorical(merged_df: pd.DataFrame, save_encoders=False, load_encode
     else:
         # Train and save all encoders
         for cat_feature in categorical_features:
+
+            # encode
             encoder = OneHotEncoder(sparse_output=False)
             encoder.fit(merged_df[[cat_feature]])
+            if save_encoders and encoder_path:
+                save_encoder(encoder, os.path.join(encoder_path, f"{cat_feature}_encoder.pkl"))
             encoded_data = encoder.transform(merged_df[[cat_feature]])
+
+            # scale
             num_categories = encoded_data.shape[1]
             scaled_data = encoded_data / num_categories
             X_categorical_scaled.append(scaled_data)
-            if save_encoders and encoder_path:
-                save_encoder(encoder, os.path.join(encoder_path, f"{cat_feature}_encoder.pkl"))
 
     return np.hstack(X_categorical_scaled)
 
 
-def encode_textual(merged_df: pd.DataFrame, model, save_encoders=False, load_encoders=False, encoder_path=None):
+def encode_textual(
+    merged_df: pd.DataFrame, model, save_encoders: bool = False, load_encoders: bool = False, encoder_path=None
+):
     """Encode textual features using a model and scale the embeddings."""
     if load_encoders and encoder_path:
         review_embeddings = load_encoder(os.path.join(encoder_path, "review_embeddings.pkl"))
@@ -91,7 +97,14 @@ def encode_textual(merged_df: pd.DataFrame, model, save_encoders=False, load_enc
     return np.hstack((review_embeddings_scaled, metadata_embeddings_scaled))
 
 
-def encode_data(merged_df, model, save_encoders=False, load_encoders=False, encoder_path=None):
+# ==========================================================================
+# Exported functions
+# ==========================================================================
+
+
+def encode_data(
+    merged_df: pd.DataFrame, model, save_encoders: bool = False, load_encoders: bool = False, encoder_path=None
+) -> pd.DataFrame:
     """
     Encode numerical, categorical, and textual data
     and combine all features into a single dataset.
