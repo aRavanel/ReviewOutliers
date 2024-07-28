@@ -14,9 +14,17 @@ class OutlierDetectionRequest(BaseModel):
     features: List[float]
 
 
+class BatchOutlierDetectionRequest(BaseModel):
+    requests: List[OutlierDetectionRequest]
+
+
 class OutlierDetectionResponse(BaseModel):
     is_outlier: bool
     score: float
+
+
+class BatchOutlierDetectionResponse(BaseModel):
+    requests: List[OutlierDetectionResponse]
 
 
 router = APIRouter()
