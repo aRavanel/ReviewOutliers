@@ -75,26 +75,38 @@ def encode_categorical(
     return np.hstack(X_categorical_scaled)
 
 
-def encode_textual(
-    merged_df: pd.DataFrame, model, save_encoders: bool = False, load_encoders: bool = False, encoder_path=None
-):
+def encode_textual(merged_df: pd.DataFrame, model):
     """Encode textual features using a model and scale the embeddings."""
-    if load_encoders and encoder_path:
-        review_embeddings = load_encoder(os.path.join(encoder_path, "review_embeddings.pkl"))
-        metadata_embeddings = load_encoder(os.path.join(encoder_path, "metadata_embeddings.pkl"))
-    else:
-        review_embeddings = model.encode(merged_df["review_text"].tolist(), show_progress_bar=True)
-        metadata_embeddings = model.encode(merged_df["metadata_text"].tolist(), show_progress_bar=True)
 
-        if save_encoders and encoder_path:
-            save_encoder(review_embeddings, os.path.join(encoder_path, "review_embeddings.pkl"))
-            save_encoder(metadata_embeddings, os.path.join(encoder_path, "metadata_embeddings.pkl"))
+    # compute embeddings
+    review_embeddings = model.encode(merged_df["review_text"].tolist(), show_progress_bar=True)
+    metadata_embeddings = model.encode(merged_df["metadata_text"].tolist(), show_progress_bar=True)
 
+    # scale the embeddings
     embedding_size = model.get_sentence_embedding_dimension()
     review_embeddings_scaled = review_embeddings / embedding_size
     metadata_embeddings_scaled = metadata_embeddings / embedding_size
 
-    return np.hstack((review_embeddings_scaled, metadata_embeddings_scaled))
+    # add some specific features
+    good_embeddings = model.encode(["Good product. I am happy"], show_progress_bar=False)
+    expensive_embeddings = model.encode(["Very expensive."], show_progress_bar=False)
+    scam_embeddings = model.encode(["This is a scam. Do not buy."], show_progress_bar=False)
+    error_embeddings = model.encode(
+        ["There was an error in the product. The delivery had an issue. Wrong product."], show_progress_bar=False
+    )
+
+    # compute cosine similarity of review with the specific features above
+    good_similarity = np.dot(review_embeddings_scaled, good_embeddings.T)
+    expensive_similarity = np.dot(review_embeddings_scaled, expensive_embeddings.T)
+    scam_similarity = np.dot(review_embeddings_scaled, scam_embeddings.T)
+    error_similarity = np.dot(review_embeddings_scaled, error_embeddings.T)
+    specific_features = np.hstack((good_similarity, expensive_similarity, scam_similarity, error_similarity))
+    specific_features = specific_features / len(specific_features)
+
+    # embeddings tuple
+    embeddings = (review_embeddings_scaled, metadata_embeddings_scaled, specific_features)
+
+    return np.hstack(embeddings)
 
 
 # ==========================================================================
@@ -111,7 +123,7 @@ def encode_data(
     """
     X_numerical_standardized = encode_numerical(merged_df, save_encoders, load_encoders, encoder_path)
     X_categorical_scaled = encode_categorical(merged_df, save_encoders, load_encoders, encoder_path)
-    X_textual_scaled = encode_textual(merged_df, model, save_encoders, load_encoders, encoder_path)
+    X_textual_scaled = encode_textual(merged_df, model)
 
     # Combine all features into a single dataset
     X_combined = np.hstack((X_numerical_standardized, X_categorical_scaled, X_textual_scaled))
