@@ -1,4 +1,4 @@
-.PHONY: install test lint format run_fast build_docker run_docker
+.PHONY: install test lint typecheck format run_fast build_docker run_docker
 
 install:
 	poetry install
@@ -12,9 +12,13 @@ lint:
 format:
 	poetry run black .
 
+typecheck:
+	poetry run mypy .
+
 full:
 	make lint
 	make format
+	make typecheck
 
 run_fast:
 	poetry run uvicorn src.app:app --reload
