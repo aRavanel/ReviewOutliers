@@ -20,6 +20,7 @@ ydata-profiling = "^4.9.0"
 tqdm = "^4.66.4"
 black = {extras = ["jupyter"], version = "^24.4.2"}
 sentence-transformers = "^3.0.1"
+mypy = "^1.11.0"
 
 [tool.poetry.dev-dependencies]
 black = "^24.4.0"

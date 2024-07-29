@@ -1,3 +1,4 @@
+from typing import Any
 import numpy as np
 from scipy.stats import ks_2samp
 
@@ -32,7 +33,7 @@ def _psi_expected_actual(expected_array, actual_array, buckets):
 # ==========================================================================
 
 
-def ks_test_score(train_data: np.ndarray, test_data: np.ndarray) -> float:
+def ks_test_score(train_data: np.ndarray, test_data: np.ndarray) -> Any:
     """
     This function calculates the Kolmogorov-Smirnov test statistic between two arrays.
     The KS test is a statistical test used to compare the cumulative distribution functions of two datasets.
@@ -57,4 +58,4 @@ def psi(expected_array: np.ndarray, actual_array: np.ndarray, buckets: int = 10)
     psi_value = np.sum(
         (expected_percents - actual_percents) * np.log((expected_percents + epsilon) / (actual_percents + epsilon))
     )
-    return psi_value
+    return float(psi_value)

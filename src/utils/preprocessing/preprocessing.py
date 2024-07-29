@@ -11,14 +11,25 @@ from src.utils.preprocessing.preprocessing_cleaning import clean_enrich_reviews,
 
 
 def preprocess_data(df_metadata: pd.DataFrame, df_review: pd.DataFrame, model, max_samples=10_000):
-    """ """
+    """
+    Preprocess metadata and review data, merge them, and encode textual features using a provided model.
+    """
+
+    # Validate inputs
+    if df_metadata.empty or df_review.empty:
+        raise ValueError("Input DataFrames should not be empty.")
+
+    if "parent_asin" not in df_metadata.columns or "parent_asin" not in df_review.columns:
+        raise ValueError("Both DataFrames must contain the 'parent_asin' column.")
 
     # clean data and create features
     df_metadata = clean_enrich_metadata(df_metadata)
     df_review = clean_enrich_reviews(df_review)
 
     # Merge the datasets on 'parent_asin' with suffixes for duplicate columns
-    merged_df = pd.merge(df_review, df_metadata, on="parent_asin", how="inner", suffixes=("_review", "_metadata"))
+    merged_df = pd.merge(
+        df_review, df_metadata, on="parent_asin", how="inner", suffixes=("_review", "_metadata"), validate="many_to_one"
+    )
     merged_df = merged_df.drop(columns=["parent_asin", "asin"])  # those features will be OOD at inference for new data
 
     # limit to wanted sample size, random_state for reproducibility

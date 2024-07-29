@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
 import pandas as pd
-from src.utils.preprocessing.preprocessing_cleaning import preprocess_data, clean_enrich_reviews, clean_enrich_metadata
-from src.utils.preprocessing.preprocessing_encoding import distribution_shift_function
+from src.utils.preprocessing.preprocessing import preprocess_data
+from src.tasks.distribution_shift import distribution_shift_function
 
 # ==========================================================================
 # Shema and module variables
@@ -30,6 +30,9 @@ class BatchDistributionShiftResponse(BaseModel):
 
 router = APIRouter()
 
+# Load metadata dataframe
+df_metadata = TODO  # read from data/processed/metadata.parquet
+
 # ==========================================================================
 # Exported functions
 # ==========================================================================
@@ -38,10 +41,10 @@ router = APIRouter()
 @router.post("/distribution_shift", response_model=BatchDistributionShiftResponse)
 def distribution_shift(request: BatchDistributionShiftRequest):
     # Construct a DataFrame from the list of requests
-    df = pd.DataFrame([req.dict() for req in request.requests])
+    df_review = pd.DataFrame([req.dict() for req in request.requests])
 
     # Preprocess the data
-    df = clean_enrich_reviews(df)
+    df = preprocess_data(df_metadata, df_review, model, max_samples=10_000)
 
     # Apply the distribution shift function to each processed feature set
     df["shift_score"] = df["processed_features"].apply(distribution_shift_function)

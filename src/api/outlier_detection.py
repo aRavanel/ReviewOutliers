@@ -1,6 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
+import pandas as pd
+
+# module imports
+from src.tasks.outliers import outliers_inference
 
 
 # ==========================================================================
@@ -19,12 +23,12 @@ class BatchOutlierDetectionRequest(BaseModel):
 
 
 class OutlierDetectionResponse(BaseModel):
-    is_outlier: bool
+    is_outlier: int
     score: float
 
 
 class BatchOutlierDetectionResponse(BaseModel):
-    requests: List[OutlierDetectionResponse]
+    results: List[OutlierDetectionResponse]
 
 
 router = APIRouter()
@@ -36,11 +40,17 @@ router = APIRouter()
 
 @router.post("/detect_outliers", response_model=OutlierDetectionResponse)
 def detect_outliers(request: OutlierDetectionRequest):
-    # Placeholder for actual outlier detection logic
-    is_outlier = False
-    score = 0.0
 
-    # Implement outlier detection here
-    # is_outlier, score = outlier_detection_function(request.text, request.features)
+    # format the data
+    features = request.features
+    text = request.text
+    df = pd.DataFrame([{"text": text, "features": features}])
 
-    return OutlierDetectionResponse(is_outlier=is_outlier, score=score)
+    # run the outlier algorithm
+    list_outlier, list_score = outliers_inference(df)
+
+    # format the output data to have valid output format
+    results = [
+        OutlierDetectionResponse(is_outlier=is_outlier, score=score) for is_outlier, score in zip(list_outlier, list_score)
+    ]
+    return BatchOutlierDetectionResponse(results=results)
