@@ -19,4 +19,4 @@ def read_root():
     Root endpoint for the Outlier Detection and Distribution Shift API.
     Returns a welcome message.
     """
-    return {"message": "Welcome to the Outlier Detection and Distribution Shift API"}
+    return {"message": "Welcome 👋 to the Outlier Detection and Distribution Shift API"}

@@ -8,7 +8,7 @@ from scipy.stats import ks_2samp
 # ==========================================================================
 
 
-def _scale_range(input_array, min_val, max_val):
+def _scale_range(input_array, min_val: int, max_val: int):
     """
     Scales the values of an input array to a specific range.
     """

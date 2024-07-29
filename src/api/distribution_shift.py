@@ -4,7 +4,7 @@ from typing import List
 import os
 import pandas as pd
 from src.utils.preprocessing.preprocessing import preprocess_data
-from src.tasks.distribution_shift import 
+from src.tasks.distribution_shift import distribution_shift_scoring
 
 # ==========================================================================
 # Shema and module variables
@@ -33,7 +33,7 @@ router = APIRouter()
 
 # Load metadata dataframe
 df_metadata = pd.read_parquet(os.path.join("..", "data", "processed", "metadata.parquet"))
-d
+
 # load the model
 
 # ==========================================================================
@@ -47,10 +47,10 @@ def distribution_shift(request: BatchDistributionShiftRequest):
     df_review = pd.DataFrame([req.dict() for req in request.requests])
 
     # Preprocess the data
-    df = preprocess_data(df_metadata, df_review, model, max_samples=10_000)
+    df = preprocess_data(df_metadata, df_review, max_samples=10_000)
 
     # Apply the distribution shift function to each processed feature set
-    df["shift_score"] = df["processed_features"].apply(distribution_shift_function)
+    df["shift_score"] = df["processed_features"].apply(distribution_shift_scoring)
 
     # Convert the results to a list of DistributionShiftResponse
     responses = [DistributionShiftResponse(shift_score=row["shift_score"]) for index, row in df.iterrows()]

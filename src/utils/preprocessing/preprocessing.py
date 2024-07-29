@@ -4,6 +4,10 @@ import pandas as pd
 from src.utils.preprocessing.preprocessing_encoding import encode_data
 from src.utils.preprocessing.preprocessing_cleaning import clean_enrich_reviews, clean_enrich_metadata
 
+# ==========================================================================
+# Module variables
+# ==========================================================================
+
 
 # ==========================================================================
 # Exported functions
