@@ -3,7 +3,16 @@ from typing import Any
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sentence_transformers import SentenceTransformer
 import pickle
+
+# ==========================================================================
+# Module variables
+# ==========================================================================
+from src.config import MODEL_NAME_EMBEDDINGS
+
+model_embeddings = SentenceTransformer(MODEL_NAME_EMBEDDINGS)
+
 
 # ==========================================================================
 # Utils functions
@@ -44,7 +53,9 @@ def encode_numerical(merged_df: pd.DataFrame, save_encoders: bool = False, load_
 def encode_categorical(
     merged_df: pd.DataFrame, save_encoders: bool = False, load_encoders: bool = False, encoder_path=None
 ):
-    """Encode categorical features and scale them to have unit variance."""
+    """
+    Encode categorical features and scale them to have unit variance.
+    """
     categorical_features = merged_df.select_dtypes(include=["category", "bool"]).columns.tolist()
     X_categorical_scaled = []
 
@@ -76,22 +87,24 @@ def encode_categorical(
 
 
 def encode_textual(merged_df: pd.DataFrame, model):
-    """Encode textual features using a model and scale the embeddings."""
+    """
+    Encode textual features using a model and scale the embeddings.
+    """
 
     # compute embeddings
-    review_embeddings = model.encode(merged_df["review_text"].tolist(), show_progress_bar=True)
-    metadata_embeddings = model.encode(merged_df["metadata_text"].tolist(), show_progress_bar=True)
+    review_embeddings = model_embeddings.encode(merged_df["review_text"].tolist(), show_progress_bar=True)
+    metadata_embeddings = model_embeddings.encode(merged_df["metadata_text"].tolist(), show_progress_bar=True)
 
     # scale the embeddings
-    embedding_size = model.get_sentence_embedding_dimension()
+    embedding_size = model_embeddings.get_sentence_embedding_dimension()
     review_embeddings_scaled = review_embeddings / embedding_size
     metadata_embeddings_scaled = metadata_embeddings / embedding_size
 
     # add some specific features
-    good_embeddings = model.encode(["Good product. I am happy"], show_progress_bar=False)
-    expensive_embeddings = model.encode(["Very expensive."], show_progress_bar=False)
-    scam_embeddings = model.encode(["This is a scam. Do not buy."], show_progress_bar=False)
-    error_embeddings = model.encode(
+    good_embeddings = model_embeddings.encode(["Good product. I am happy"], show_progress_bar=False)
+    expensive_embeddings = model_embeddings.encode(["Very expensive."], show_progress_bar=False)
+    scam_embeddings = model_embeddings.encode(["This is a scam. Do not buy."], show_progress_bar=False)
+    error_embeddings = model_embeddings.encode(
         ["There was an error in the product. The delivery had an issue. Wrong product."], show_progress_bar=False
     )
 
@@ -115,7 +128,7 @@ def encode_textual(merged_df: pd.DataFrame, model):
 
 
 def encode_data(
-    merged_df: pd.DataFrame, model, save_encoders: bool = False, load_encoders: bool = False, encoder_path=None
+    merged_df: pd.DataFrame, save_encoders: bool = False, load_encoders: bool = False, encoder_path=None
 ) -> pd.DataFrame:
     """
     Encode numerical, categorical, and textual data

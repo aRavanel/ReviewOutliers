@@ -10,7 +10,7 @@ from src.utils.preprocessing.preprocessing_cleaning import clean_enrich_reviews,
 # ==========================================================================
 
 
-def preprocess_data(df_metadata: pd.DataFrame, df_review: pd.DataFrame, model, max_samples=10_000):
+def preprocess_data(df_metadata: pd.DataFrame, df_review: pd.DataFrame, max_samples=10_000):
     """
     Preprocess metadata and review data, merge them, and encode textual features using a provided model.
     """
@@ -36,6 +36,6 @@ def preprocess_data(df_metadata: pd.DataFrame, df_review: pd.DataFrame, model, m
     merged_df = merged_df.sample(n=max_samples, random_state=42)
 
     # encode the data
-    combined_df = encode_data(merged_df, model=model)
+    combined_df = encode_data(merged_df)
 
     return combined_df
