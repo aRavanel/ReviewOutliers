@@ -28,11 +28,6 @@ def _psi_expected_actual(expected_array, actual_array, buckets):
     return expected_percents, actual_percents
 
 
-# ==========================================================================
-# Exported functions
-# ==========================================================================
-
-
 def ks_test_score(train_data: np.ndarray, test_data: np.ndarray) -> Any:
     """
     This function calculates the Kolmogorov-Smirnov test statistic between two arrays.
@@ -45,10 +40,12 @@ def ks_test_score(train_data: np.ndarray, test_data: np.ndarray) -> Any:
 
 def psi(expected_array: np.ndarray, actual_array: np.ndarray, buckets: int = 10) -> float:
     """
-    This function calculates the Percentage of the Sample (PSI) which is a measure of the degree of divergence between two probability distributions.
+    This function calculates the Percentage of the Sample (PSI) which is a measure of the degree
+    of divergence between two probability distributions.
     It is used in anomaly detection and distribution shift analysis.
     It is calculated as the sum of the differences between the expected and actual percentages in each bucket.
-    The PSI value ranges from 0 to 1, where a value of 0 indicates that the two distributions are identical, and a value of 1 indicates that they are very different.
+    The PSI value ranges from 0 to 1, where a value of 0 indicates that the two distributions are identical,
+    and a value of 1 indicates that they are very different.
     """
     expected_array = _scale_range(expected_array, 0, 10)
     actual_array = _scale_range(actual_array, 0, 10)
@@ -59,3 +56,29 @@ def psi(expected_array: np.ndarray, actual_array: np.ndarray, buckets: int = 10)
         (expected_percents - actual_percents) * np.log((expected_percents + epsilon) / (actual_percents + epsilon))
     )
     return float(psi_value)
+
+
+# ==========================================================================
+# Exported functions
+# ==========================================================================
+
+
+def distribution_shift_scoring(samples, method="psi") -> Any:
+    """
+    This function calculates the distribution shift score
+    """
+
+    # load first distribution serving as comparison
+    initial_distribution = samples
+
+    # compute the distribution shfit scores
+    if method == "psi":
+        score = psi(initial_distribution, samples)
+
+    elif method == "ks":
+        score = ks_test_score(initial_distribution, samples)
+
+    else:
+        raise NotImplementedError
+
+    return score

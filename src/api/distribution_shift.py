@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import List
+import os
 import pandas as pd
 from src.utils.preprocessing.preprocessing import preprocess_data
-from src.tasks.distribution_shift import distribution_shift_function
+from src.tasks.distribution_shift import 
 
 # ==========================================================================
 # Shema and module variables
@@ -31,7 +32,9 @@ class BatchDistributionShiftResponse(BaseModel):
 router = APIRouter()
 
 # Load metadata dataframe
-df_metadata = TODO  # read from data/processed/metadata.parquet
+df_metadata = pd.read_parquet(os.path.join("..", "data", "processed", "metadata.parquet"))
+d
+# load the model
 
 # ==========================================================================
 # Exported functions
