@@ -20,6 +20,6 @@ FILENAME_STANDARDIZER = "standardizer.pkl"
 
 # Paths
 BASE_PATH_MODEL = os.path.join("data", "models")
-BASE_PATH_DATA = os.path.join("data", "data")
+BASE_PATH_DATA = os.path.join("data")
 MODEL_PATH_OUTLIER = os.path.join(BASE_PATH_MODEL, FILENAME_OUTLIER)
 MODEL_PATH_STANDARDIZER = os.path.join(BASE_PATH_MODEL, FILENAME_STANDARDIZER)

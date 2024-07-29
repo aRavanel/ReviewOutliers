@@ -3,6 +3,7 @@ import pickle
 from typing import List, Tuple
 from pyod.models.iforest import IForest
 import pandas as pd
+import numpy as np
 
 
 # ==========================================================================
@@ -18,6 +19,7 @@ def save_model_outlier(model) -> None:
             pickle.dump(model, file)
     except IOError as e:
         print(f"Error saving the model: {e}")
+        print(f"Current Directory: {os.getcwd()}")
 
 
 def load_model_outlier():
@@ -36,7 +38,7 @@ def load_model_outlier():
 # ==========================================================================
 
 
-def outlier_detection(df: pd.DataFrame, training: bool = True) -> Tuple[List[int], List[float]]:
+def outlier_detection(df: pd.DataFrame, training: bool = True) -> Tuple[np.ndarray, np.ndarray]:
     """
     Train the Isolation Forest model on the training set and optionally save it.
      scores > 0   ->   outlier
@@ -63,4 +65,4 @@ def outlier_detection(df: pd.DataFrame, training: bool = True) -> Tuple[List[int
     outliers = model.predict(df)  # list of 0 (inliner) and 1 (outlier)
     scores = model.decision_function(df)  # list of scores
 
-    return outliers.tolist(), scores.tolist()
+    return np.array(outliers), np.array(scores)

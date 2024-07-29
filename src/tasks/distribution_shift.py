@@ -36,6 +36,11 @@ def _psi_expected_actual(expected_array, actual_array, buckets):
     Returns:
     - Tuple[np.ndarray, np.ndarray]: Percentages in each bucket for expected and actual arrays.
     """
+    if not isinstance(expected_array, np.ndarray):
+        expected_array = np.array(expected_array)
+    if not isinstance(actual_array, np.ndarray):
+        actual_array = np.array(actual_array)
+
     breakpoints = np.arange(0, buckets + 1) / (buckets) * 100
     expected_percents = np.histogram(expected_array, np.percentile(expected_array, breakpoints))[0] / len(expected_array)
     actual_percents = np.histogram(actual_array, np.percentile(expected_array, breakpoints))[0] / len(actual_array)
@@ -52,7 +57,7 @@ def ks_test_score(train_data: np.ndarray, test_data: np.ndarray) -> float:
     return ks_stat
 
 
-def psi(expected_array: np.ndarray, actual_array: np.ndarray, buckets: int = 10) -> float:
+def psi(expected_array: np.ndarray, actual_array: np.ndarray, buckets: int = 10):
     """
     This function calculates the Percentage of the Sample (PSI) which is a measure of the degree
     of divergence between two probability distributions.
@@ -68,7 +73,7 @@ def psi(expected_array: np.ndarray, actual_array: np.ndarray, buckets: int = 10)
     psi_value = np.sum(
         (expected_percents - actual_percents) * np.log((expected_percents + EPSILON) / (actual_percents + EPSILON))
     )
-    return float(psi_value)
+    return psi_value
 
 
 # ==========================================================================
