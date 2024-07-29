@@ -1,30 +1,34 @@
+import os
 import pickle
-from typing import List
+from typing import List, Tuple
 from pyod.models.iforest import IForest
 import pandas as pd
-import os
 
-# module imports
-import src.config as CONFIG
 
 # ==========================================================================
 # Utils functions and module
 # ==========================================================================
-BASE_PATH_MODEL = os.path.join("data", "models")
-MODEL_PATH = os.path.join(BASE_PATH_MODEL, CONFIG.FILENAME_OUTLIER)
+from src.config import MODEL_NAME_OUTLIER, MODEL_PATH_OUTLIER
 
 
 def save_model_outlier(model) -> None:
     """Save the model to a file using pickle."""
-    with open(MODEL_PATH, "wb") as file:
-        pickle.dump(model, file)
+    try:
+        with open(MODEL_PATH_OUTLIER, "wb") as file:
+            pickle.dump(model, file)
+    except IOError as e:
+        print(f"Error saving the model: {e}")
 
 
 def load_model_outlier():
     """Load the model from a file using pickle."""
-    with open(MODEL_PATH, "rb") as file:
-        model = pickle.load(file)
-    return model
+    try:
+        with open(MODEL_PATH_OUTLIER, "rb") as file:
+            model = pickle.load(file)
+        return model
+    except IOError as e:
+        print(f"Error loading the model: {e}")
+        raise e
 
 
 # ==========================================================================
@@ -32,37 +36,31 @@ def load_model_outlier():
 # ==========================================================================
 
 
-def outliers_train(train_df: pd.DataFrame, save_path: str | None = None):
+def outlier_detection(df: pd.DataFrame, training: bool = True) -> Tuple[List[int], List[float]]:
     """
     Train the Isolation Forest model on the training set and optionally save it.
-    """
-
-    # create the model
-    if CONFIG.MODEL_NAME == "isolation_forest":
-        model = IForest(contamination=0.1, random_state=42)  # 0.1 -> expect 10% of outliers
-    else:
-        raise ValueError(f"Invalid model name: {CONFIG.MODEL_NAME}")
-
-    # train the model
-    model.fit(train_df)
-
-    if save_path:
-        save_model_outlier(model)
-
-    return model
-
-
-def outliers_inference(df: pd.DataFrame) -> tuple[List[int], List[float]]:
-    """
-    scores > 0   ->   outlier
+     scores > 0   ->   outlier
     Predict outliers and compute scores for the test set.
     """
 
-    # load the model
-    model = load_model_outlier()
+    if training:
+        # create the model
+        match MODEL_NAME_OUTLIER:
+            case "isolation_forest":
+                model = IForest(contamination=0.1, random_state=42)  # 0.1 -> expect 10% of outliers
+            case _:
+                raise ValueError(f"Invalid model name: {MODEL_NAME_OUTLIER}")
+
+        # train the model
+        model.fit(df)
+        save_model_outlier(model)
+
+    else:
+        # load the model
+        model = load_model_outlier()
 
     # run the prediction
-    outliers_test = model.predict(df)  # list of 0 (inliner) and 1 (outlier)
-    scores_test = model.decision_function(df)  # list of scores
+    outliers = model.predict(df)  # list of 0 (inliner) and 1 (outlier)
+    scores = model.decision_function(df)  # list of scores
 
-    return outliers_test, scores_test
+    return outliers.tolist(), scores.tolist()

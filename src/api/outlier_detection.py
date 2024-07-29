@@ -4,7 +4,7 @@ from typing import List
 import pandas as pd
 
 # module imports
-from src.tasks.outliers import outliers_inference
+from src.tasks.outliers import outlier_detection
 
 
 # ==========================================================================
@@ -47,7 +47,7 @@ def detect_outliers(request: OutlierDetectionRequest):
     df = pd.DataFrame([{"text": text, "features": features}])
 
     # run the outlier algorithm
-    list_outlier, list_score = outliers_inference(df)
+    list_outlier, list_score = outlier_detection(df, training=False)
 
     # format the output data to have valid output format
     results = [
