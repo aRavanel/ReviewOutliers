@@ -1,10 +1,11 @@
 import os
-from typing import Any
-import pandas as pd
+import pickle
+from typing import Any, Tuple
+
 import numpy as np
+import pandas as pd
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sentence_transformers import SentenceTransformer
-import pickle
 
 # ==========================================================================
 # Module variables
@@ -23,16 +24,23 @@ model_embeddings = SentenceTransformer(MODEL_NAME_EMBEDDINGS)  # text embeddings
 # ==========================================================================
 
 
-def save_encoder(encoder, file_name: str) -> None:
+def save_encoder(encoder: Any, file_name: str) -> None:
     """Save the encoder as a pickle file."""
-    with open(file_name, "wb") as encoder_file:
-        pickle.dump(encoder, encoder_file)
+    try:
+        with open(file_name, "wb") as encoder_file:
+            pickle.dump(encoder, encoder_file)
+    except IOError as e:
+        print(f"Error saving encoder to {file_name}: {e}")
 
 
 def load_encoder(file_name: str) -> Any:
     """Load the encoder from a pickle file."""
-    with open(file_name, "rb") as encoder_file:
-        return pickle.load(encoder_file)
+    try:
+        with open(file_name, "rb") as encoder_file:
+            return pickle.load(encoder_file)
+    except IOError as e:
+        print(f"Error loading encoder from {file_name}: {e}")
+        return None
 
 
 def encode_numerical(merged_df: pd.DataFrame, training: bool = True):
@@ -45,45 +53,39 @@ def encode_numerical(merged_df: pd.DataFrame, training: bool = True):
         x_numerical = merged_df[numerical_features].values
         scaler_numerical.fit(x_numerical)
         save_encoder(scaler_numerical, MODEL_PATH_STANDARDIZER)
-    else:
-        # inference
+    else:  # inference
         scaler_numerical = load_encoder(MODEL_PATH_STANDARDIZER)
+        if scaler_numerical is None:
+            raise ValueError("Failed to load the numerical scaler.")
 
     x_numerical_standardized = scaler_numerical.transform(merged_df[numerical_features].values)
     return x_numerical_standardized
 
 
-def encode_categorical(merged_df: pd.DataFrame, training: bool = True):
+def encode_categorical(merged_df: pd.DataFrame, training: bool = True) -> np.ndarray:
     """
-    Encode categorical features and scale them to have unit variance.
+    Encode categorical features
+    and scale them: so that they are not dominant when computing distances
     """
     categorical_features = merged_df.select_dtypes(include=["category", "bool"]).columns.tolist()
-    X_categorical_scaled = []
+    x_categorical_scaled = []
 
-    if training:
-        # Train and save all encoders
-        for cat_feature in categorical_features:
-            # encode
+    for cat_feature in categorical_features:
+        if training:
             encoder = OneHotEncoder(sparse_output=False)
             encoder.fit(merged_df[[cat_feature]])
             save_encoder(encoder, os.path.join(BASE_PATH_MODEL, f"{cat_feature}_encoder.pkl"))
-            encoded_data = encoder.transform(merged_df[[cat_feature]])
-
-            # scale
-            num_categories = encoded_data.shape[1]
-            scaled_data = encoded_data / num_categories
-            X_categorical_scaled.append(scaled_data)
-
-    else:
-        # Load all encoders
-        for cat_feature in categorical_features:
+        else:
             encoder = load_encoder(os.path.join(BASE_PATH_MODEL, f"{cat_feature}_encoder.pkl"))
-            encoded_data = encoder.transform(merged_df[[cat_feature]])
-            num_categories = encoded_data.shape[1]
-            scaled_data = encoded_data / num_categories
-            X_categorical_scaled.append(scaled_data)
+            if encoder is None:
+                raise ValueError(f"Failed to load encoder for {cat_feature}.")
 
-    return np.hstack(X_categorical_scaled)
+        encoded_data = encoder.transform(merged_df[[cat_feature]])
+        num_categories = encoded_data.shape[1]
+        scaled_data = encoded_data / num_categories
+        x_categorical_scaled.append(scaled_data)
+
+    return np.hstack(x_categorical_scaled)
 
 
 def encode_textual(merged_df: pd.DataFrame):
@@ -131,12 +133,18 @@ def encode_data(merged_df: pd.DataFrame, training: bool = True) -> pd.DataFrame:
     """
     Encode numerical, categorical, and textual data
     and combine all features into a single dataset.
+
+    Parameters:
+    - merged_df (pd.DataFrame): DataFrame containing the data to encode.
+    - training (bool): If True, fit the encoders and save them; if False, load existing encoders.
+
+    Returns:
+    - pd.DataFrame: DataFrame containing the encoded data.
     """
-    x_numerical_standardized = encode_numerical(merged_df, training)
-    x_categorical_scaled = encode_categorical(merged_df, training)
+    x_numerical_standardized = encode_numerical(merged_df, training=training)
+    x_categorical_scaled = encode_categorical(merged_df, training=training)
     x_textual_scaled = encode_textual(merged_df)
 
-    # Combine all features into a single dataset
     x_combined = np.hstack((x_numerical_standardized, x_categorical_scaled, x_textual_scaled))
     combined_df = pd.DataFrame(x_combined, columns=[f"feature_{i}" for i in range(x_combined.shape[1])])
 
