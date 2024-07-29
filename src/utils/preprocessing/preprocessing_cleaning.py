@@ -12,7 +12,15 @@ import pandas as pd
 
 
 def clean_enrich_reviews(df_review_in: pd.DataFrame) -> pd.DataFrame:
-    """ """
+    """
+    Clean and enrich the reviews DataFrame.
+
+    Parameters:
+    - df_review_in (pd.DataFrame): Input DataFrame containing review data.
+
+    Returns:
+    - pd.DataFrame: Cleaned and enriched DataFrame.
+    """
 
     df_review = df_review_in.copy()
 
@@ -37,7 +45,7 @@ def clean_enrich_reviews(df_review_in: pd.DataFrame) -> pd.DataFrame:
     df_review["helpful_vote"] = df_review["helpful_vote"].fillna(-1).astype("int")
     df_review["verified_purchase"] = df_review["verified_purchase"].fillna(-1).astype("int")
 
-    # concatenate some text together
+    # Concatenate title and text to form review_text
     # -> this way less features because each embeddings is of high dimensionality
     df_review["review_text"] = df_review["title"] + "/n/n" + df_review["text"]
 
@@ -46,9 +54,9 @@ def clean_enrich_reviews(df_review_in: pd.DataFrame) -> pd.DataFrame:
     features_drop += ["images", "user_id"]  # too complex or not informative
     df_review = df_review.drop(columns=features_drop)
 
-    # Drop some elements that cannot be used
+    # Drop duplicates and rows with missing 'asin' or 'parent_asin'
     df_review.drop_duplicates(inplace=True)
-    df_review = df_review.dropna(subset=["asin", "parent_asin"])  # drop if 'asin' or 'parent_asin'  not filled
+    df_review = df_review.dropna(subset=["asin", "parent_asin"])
 
     return df_review
 

@@ -7,7 +7,7 @@ from src.utils.preprocessing.preprocessing import preprocess_data
 from src.tasks.distribution_shift import distribution_shift_scoring
 
 # ==========================================================================
-# Shema and module variables
+# Schema and module variables
 # ==========================================================================
 
 
