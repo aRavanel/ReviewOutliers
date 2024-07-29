@@ -2,6 +2,7 @@ import pickle
 from typing import List
 from pyod.models.iforest import IForest
 import pandas as pd
+import os
 
 # module imports
 import src.config as CONFIG
@@ -9,17 +10,19 @@ import src.config as CONFIG
 # ==========================================================================
 # Utils functions and module
 # ==========================================================================
+BASE_PATH_MODEL = os.path.join("data", "models")
+MODEL_PATH = os.path.join(BASE_PATH_MODEL, CONFIG.FILENAME_OUTLIER)
 
 
-def save_model(model, filepath: str):
+def save_model_outlier(model) -> None:
     """Save the model to a file using pickle."""
-    with open(filepath, "wb") as file:
+    with open(MODEL_PATH, "wb") as file:
         pickle.dump(model, file)
 
 
-def load_model(filepath: str):
+def load_model_outlier():
     """Load the model from a file using pickle."""
-    with open(filepath, "rb") as file:
+    with open(MODEL_PATH, "rb") as file:
         model = pickle.load(file)
     return model
 
@@ -44,7 +47,7 @@ def outliers_train(train_df: pd.DataFrame, save_path: str | None = None):
     model.fit(train_df)
 
     if save_path:
-        save_model(model, save_path)
+        save_model_outlier(model)
 
     return model
 
@@ -56,7 +59,7 @@ def outliers_inference(df: pd.DataFrame) -> tuple[List[int], List[float]]:
     """
 
     # load the model
-    model = load_model(CONFIG.FILENAME_OUTLIER)
+    model = load_model_outlier()
 
     # run the prediction
     outliers_test = model.predict(df)  # list of 0 (inliner) and 1 (outlier)
