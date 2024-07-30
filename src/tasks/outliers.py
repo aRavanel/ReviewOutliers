@@ -1,6 +1,6 @@
 import os
 import pickle
-from typing import List, Tuple
+from typing import Tuple
 from pyod.models.iforest import IForest
 import pandas as pd
 import numpy as np

@@ -44,10 +44,10 @@ df_metadata = pd.read_parquet(os.path.join("..", "data", "processed", "metadata.
 @router.post("/distribution_shift", response_model=BatchDistributionShiftResponse)
 def distribution_shift(request: BatchDistributionShiftRequest):
     # Construct a DataFrame from the list of requests
-    df_review = pd.DataFrame([req.dict() for req in request.requests])
+    df_merged = pd.DataFrame([req.dict() for req in request.requests])
 
     # Preprocess the data
-    df = preprocess_data(df_metadata, df_review, max_samples=10_000)
+    df = preprocess_data(df_merged, training=False)
 
     # Apply the distribution shift function to each processed feature set
     df["shift_score"] = df["processed_features"].apply(distribution_shift_scoring)
