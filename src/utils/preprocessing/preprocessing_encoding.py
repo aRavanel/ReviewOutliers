@@ -72,7 +72,7 @@ def encode_categorical(merged_df: pd.DataFrame, training: bool = True) -> np.nda
 
     for cat_feature in categorical_features:
         if training:
-            encoder = OneHotEncoder(sparse_output=False)
+            encoder = OneHotEncoder(sparse_output=False, handle_unknown="ignore")
             encoder.fit(merged_df[[cat_feature]])
             save_encoder(encoder, os.path.join(BASE_PATH_MODEL, f"{cat_feature}_encoder.pkl"))
         else:

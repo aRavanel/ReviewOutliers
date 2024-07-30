@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
+from pydantic import BaseModel
+from datetime import datetime
 import pandas as pd
 
 # module imports
@@ -14,8 +16,18 @@ from src.tasks.outliers import outlier_detection
 
 # Define request and response models
 class OutlierDetectionRequest(BaseModel):
+    main_category: str
+    title_review: str
+    average_rating: float
+    rating_number: int
+    features: List[str]
+    store: str
+    rating: float
+    title_metadata: str
     text: str
-    features: List[float]
+    timestamp: datetime
+    helpful_vote: int
+    verified_purchase: bool
 
 
 class BatchOutlierDetectionRequest(BaseModel):

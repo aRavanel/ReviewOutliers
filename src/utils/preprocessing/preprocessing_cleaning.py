@@ -6,6 +6,11 @@ import pandas as pd
 # ==========================================================================
 
 
+# ==========================================================================
+# Exported functions
+# ==========================================================================
+
+
 def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
     """ """
     df = df_in.copy()
@@ -66,26 +71,7 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
         "price",  # mostly empty
         "description",  # mostly empty
     ]
-    df.drop(columns=features_to_drop, inplace=True)
-
-    # Drop duplicates and rows with missing 'asin' or 'parent_asin'
+    df.drop(columns=features_to_drop, inplace=True, errors="ignore")  # errors='ignore' in case already dropped
     df.drop_duplicates(inplace=True)
-    df = df.dropna(subset=["asin", "parent_asin"])
 
     return df
-
-
-# ==========================================================================
-# Exported functions
-# ==========================================================================
-
-
-def clean_data(df_review, df_metadata) -> pd.DataFrame:
-    """ """
-    # merge data
-    df_merged = pd.merge(df_review, df_metadata, on="parent_asin", how="inner", suffixes=("_review", "_metadata"))
-
-    # clean it
-    df_merged = clean_enrich(df_merged)
-
-    return df_merged

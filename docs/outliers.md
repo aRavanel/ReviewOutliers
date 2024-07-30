@@ -2,8 +2,10 @@
 
 ### Why Detect Outliers?
 - Detect incorrect data
-- Detect fraud
 - Detect extreme cases
+  - interesting / hard cases
+  - fraud
+  - ...
 
 ### Types of Methods
 - **Unsupervised**: Chosen here
@@ -77,8 +79,6 @@
 - **Jaccard Index**: Intersection size divided by union size of categories
 - **Goodall's D**: More weight to rare category differences
 - **Gower's Distance**: Normalizes contributions of different data types
-- **One-Hot Encoding with Euclidean Distance**: Converts categories to binary and measures Euclidean distance
-- **Frequency-Based Methods**: Uses category frequency, emphasizing rare categories
 
 ## Libraries
 - **scikit-learn**: General machine learning library
@@ -94,25 +94,18 @@
    - Categorical: Nominal or ordinal categories
    - Text: Strings or sentences
    - Date/Time: Temporal data
+ - 
+2. **Handle Missing Values**
+   - Numerical: Impute using mean, median, or regression
+   - Categorical: Impute using mode or predictive models
+   - Text: Impute with placeholder or use NLP techniques
 
-2. **Preprocess Data**
+3. **Preprocess Data / Feature Engineering**
    - **Numerical Data**: Standardize or normalize
    - **Categorical Data**: Encode using One-Hot or Label Encoding
    - **Text Data**: Convert to vectors (BoW, TF-IDF, embeddings)
    - **Date/Time Data**: Extract features (year, month, day)
 
-3. **Handle Missing Values**
-   - Numerical: Impute using mean, median, or regression
-   - Categorical: Impute using mode or predictive models
-   - Text: Impute with placeholder or use NLP techniques
-
-4. **Feature Engineering**
-   - Combine or create new features to better represent the data
-   - Use domain knowledge to enhance feature set
-
-5. **Scale and Transform Data**
-   - Ensure numerical features are on a similar scale
-   - Apply transformations if necessary (log, sqrt)
 
 ### Algorithms and Methods
 
