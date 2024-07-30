@@ -41,28 +41,34 @@ def load_model_outlier():
 def outlier_detection(df: pd.DataFrame, training: bool = True) -> Tuple[np.ndarray, np.ndarray]:
     """
     Train the Isolation Forest model on the training set and optionally save it.
-     scores > 0   ->   outlier
+    scores > 0   ->   outlier
     Predict outliers and compute scores for the test set.
     """
 
-    if training:
-        # create the model
-        match MODEL_NAME_OUTLIER:
-            case "isolation_forest":
-                model = IForest(contamination=0.1, random_state=42)  # 0.1 -> expect 10% of outliers
-            case _:
-                raise ValueError(f"Invalid model name: {MODEL_NAME_OUTLIER}")
+    match MODEL_NAME_OUTLIER:
+        case "isolation_forest":
+            if training:
+                # 0.1 -> expect 10% of outliers
+                model = IForest(n_estimators=100, max_samples="auto", contamination=0.1, random_state=42)
+                model.fit(df)
+                save_model_outlier(model)
+            else:
+                model = load_model_outlier()
 
-        # train the model
-        model.fit(df)
-        save_model_outlier(model)
+            # run the prediction - v0 (fixed contamination -> too rigid)
+            # outliers = model.predict(df)  # list of 0 (inliner) and 1 (outlier)
+            # scores = model.decision_function(df)  # list of scores
 
-    else:
-        # load the model
-        model = load_model_outlier()
+            # run the prediction - v1 : Calculate IQR and determine a threshold for outliers
+            scores = np.array(model.decision_function(df))  # list of scores
+            Q1 = np.percentile(scores, 25)
+            Q3 = np.percentile(scores, 75)
+            IQR = Q3 - Q1
+            threshold_lower = Q1 - 1.5 * IQR
+            threshold_upper = Q3 + 1.5 * IQR
+            outliers = (scores < threshold_lower) | (scores > threshold_upper)
 
-    # run the prediction
-    outliers = model.predict(df)  # list of 0 (inliner) and 1 (outlier)
-    scores = model.decision_function(df)  # list of scores
+        case _:
+            raise ValueError(f"Invalid model name: {MODEL_NAME_OUTLIER}")
 
     return np.array(outliers), np.array(scores)

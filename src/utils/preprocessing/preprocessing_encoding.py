@@ -94,8 +94,8 @@ def encode_textual(merged_df: pd.DataFrame):
     """
 
     # compute embeddings
-    review_embeddings = model_embeddings.encode(merged_df["review_text"].tolist(), show_progress_bar=True)
-    metadata_embeddings = model_embeddings.encode(merged_df["metadata_text"].tolist(), show_progress_bar=True)
+    review_embeddings = model_embeddings.encode(merged_df["text_review"].tolist(), show_progress_bar=True)
+    metadata_embeddings = model_embeddings.encode(merged_df["text_metadata"].tolist(), show_progress_bar=True)
 
     # scale the embeddings
     embedding_size = model_embeddings.get_sentence_embedding_dimension()

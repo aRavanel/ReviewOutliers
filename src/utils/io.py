@@ -1,5 +1,6 @@
 import gzip
 import json
+import os
 from io import StringIO
 from tqdm import tqdm
 import pandas as pd
@@ -49,15 +50,20 @@ def decompress_to_json(gz_filename, json_path):
 
 def load_dataframe(file_path: str) -> pd.DataFrame:
     """
-    Load whatever data into a pandas DataFrame
+    Load data into a pandas DataFrame.
     """
-    if file_path.endswith(".parquet"):
-        return pd.read_parquet(file_path)
-    elif file_path.endswith(".csv"):
-        return pd.read_csv(file_path)
-    elif file_path.endswith(".json"):
-        return pd.read_json(file_path)
-    elif file_path.endswith(".pkl") or file_path.endswith(".pickle"):
-        return pd.read_pickle(file_path)
-    else:
-        raise ValueError(f"Unsupported file format: {file_path}")
+    try:
+        if file_path.endswith(".parquet"):
+            return pd.read_parquet(file_path)
+        elif file_path.endswith(".csv"):
+            return pd.read_csv(file_path)
+        elif file_path.endswith(".json"):
+            return pd.read_json(file_path)
+        elif file_path.endswith(".pkl") or file_path.endswith(".pickle"):
+            return pd.read_pickle(file_path)
+        else:
+            raise ValueError(f"Unsupported file format: {file_path}")
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+        print(f"Current working directory: {os.getcwd()}")
+        raise
