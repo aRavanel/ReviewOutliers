@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sentence_transformers import SentenceTransformer
 
 # module imports
-from logger_config import logger
+from src.config import logger
 
 # ==========================================================================
 # Module variables
@@ -33,7 +33,7 @@ def save_encoder(encoder: Any, file_name: str) -> None:
         with open(file_name, "wb") as encoder_file:
             pickle.dump(encoder, encoder_file)
     except IOError as e:
-        print(f"Error saving encoder to {file_name}: {e}")
+        logger.error(f"Error saving encoder to {file_name}: {e}")
 
 
 def load_encoder(file_name: str) -> Any:
@@ -42,7 +42,7 @@ def load_encoder(file_name: str) -> Any:
         with open(file_name, "rb") as encoder_file:
             return pickle.load(encoder_file)
     except IOError as e:
-        print(f"Error loading encoder from {file_name}: {e}")
+        logger.error(f"Error loading encoder from {file_name}: {e}")
         return None
 
 

@@ -8,7 +8,7 @@ import pandas as pd
 # module imports
 from src.utils.preprocessing.preprocessing import preprocess_data
 from src.tasks.distribution_shift import distribution_shift_scoring
-from logger_config import logger
+from src.config import logger
 
 
 # ==========================================================================

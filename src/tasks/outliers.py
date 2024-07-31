@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 
 # module imports
-from logger_config import logger
+from src.config import logger
 
 
 # ==========================================================================

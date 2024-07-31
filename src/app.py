@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 # Import the routers for different endpoints
 from src.api import reviews, outlier_detection, distribution_shift
-from logger_config import logger
+from src.config import logger
 
 # Create a FastAPI application
 app = FastAPI()

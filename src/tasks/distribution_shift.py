@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import ks_2samp
 
 # module imports
-from logger_config import logger
+from src.config import logger
 
 # ==========================================================================
 # Module variables

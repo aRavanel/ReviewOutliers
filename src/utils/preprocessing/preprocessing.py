@@ -3,7 +3,7 @@ import pandas as pd
 # module imports
 from src.utils.preprocessing.preprocessing_encoding import encode_data
 from src.utils.preprocessing.preprocessing_cleaning import clean_enrich
-from logger_config import logger
+from src.config import logger
 
 # ==========================================================================
 # Module variables

@@ -6,7 +6,7 @@ from tqdm import tqdm
 import pandas as pd
 
 # module imports
-from logger_config import logger
+from src.config import logger
 
 # ==========================================================================
 # Utils functions

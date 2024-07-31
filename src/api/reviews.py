@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List
 
 # module imports
-from logger_config import logger
+from src.config import logger
 
 
 # ==========================================================================

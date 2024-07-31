@@ -6,7 +6,7 @@ import pandas as pd
 
 # module imports
 from src.tasks.outliers import outlier_detection
-from logger_config import logger
+from src.config import logger
 
 
 # ==========================================================================

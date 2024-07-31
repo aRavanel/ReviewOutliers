@@ -1,7 +1,7 @@
 import pandas as pd
 
 # module imports
-from logger_config import logger
+from src.config import logger
 
 # ==========================================================================
 # Utils functions
@@ -15,6 +15,8 @@ from logger_config import logger
 
 def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
     """ """
+    logger.debug("calling clean_enrich")
+
     df = df_in.copy()
 
     # Expand timestamp
