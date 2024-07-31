@@ -50,12 +50,26 @@ router = APIRouter()
 
 
 @router.post("/detect_outliers", response_model=OutlierDetectionResponse)
-def detect_outliers(request: OutlierDetectionRequest):
+def detect_outliers(request: BatchOutlierDetectionRequest):
 
-    # format the data
-    features = request.features
-    text = request.text
-    df = pd.DataFrame([{"text": text, "features": features}])
+    data = []
+    for req in request.requests:
+        data_i = {
+            "main_category": req.main_category,
+            "title_review": req.title_review,
+            "average_rating": req.average_rating,
+            "rating_number": req.rating_number,
+            "features": req.features,
+            "store": req.store,
+            "rating": req.rating,
+            "title_metadata": req.title_metadata,
+            "text": req.text,
+            "timestamp": req.timestamp,
+            "helpful_vote": req.helpful_vote,
+            "verified_purchase": req.verified_purchase,
+        }
+        data.append(data_i)
+    df = pd.DataFrame([data])
 
     # run the outlier algorithm
     list_outlier, list_score = outlier_detection(df, training=False)

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+from datetime import datetime
 from typing import List
 import os
 import pandas as pd
@@ -13,8 +14,18 @@ from src.tasks.distribution_shift import distribution_shift_scoring
 
 # Define request and response models
 class DistributionShiftRequest(BaseModel):
+    main_category: str
+    title_review: str
+    average_rating: float
+    rating_number: int
+    features: List[str]
+    store: str
+    rating: float
+    title_metadata: str
     text: str
-    features: List[float]
+    timestamp: datetime
+    helpful_vote: int
+    verified_purchase: bool
 
 
 class BatchDistributionShiftRequest(BaseModel):
@@ -31,9 +42,6 @@ class BatchDistributionShiftResponse(BaseModel):
 
 router = APIRouter()
 
-# Load metadata dataframe
-df_metadata = pd.read_parquet(os.path.join("..", "data", "processed", "metadata.parquet"))
-
 # load the model
 
 # ==========================================================================
@@ -44,10 +52,27 @@ df_metadata = pd.read_parquet(os.path.join("..", "data", "processed", "metadata.
 @router.post("/distribution_shift", response_model=BatchDistributionShiftResponse)
 def distribution_shift(request: BatchDistributionShiftRequest):
     # Construct a DataFrame from the list of requests
-    df_merged = pd.DataFrame([req.dict() for req in request.requests])
+    data = []
+    for req in request.requests:
+        data_i = {
+            "main_category": req.main_category,
+            "title_review": req.title_review,
+            "average_rating": req.average_rating,
+            "rating_number": req.rating_number,
+            "features": req.features,
+            "store": req.store,
+            "rating": req.rating,
+            "title_metadata": req.title_metadata,
+            "text": req.text,
+            "timestamp": req.timestamp,
+            "helpful_vote": req.helpful_vote,
+            "verified_purchase": req.verified_purchase,
+        }
+        data.append(data_i)
+    df = pd.DataFrame([data])
 
     # Preprocess the data
-    df = preprocess_data(df_merged, training=False)
+    df = preprocess_data(df, training=False)
 
     # Apply the distribution shift function to each processed feature set
     df["shift_score"] = df["processed_features"].apply(distribution_shift_scoring)
