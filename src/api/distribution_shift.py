@@ -4,8 +4,12 @@ from datetime import datetime
 from typing import List
 import os
 import pandas as pd
+
+# module imports
 from src.utils.preprocessing.preprocessing import preprocess_data
 from src.tasks.distribution_shift import distribution_shift_scoring
+from logger_config import logger
+
 
 # ==========================================================================
 # Schema and module variables
@@ -51,6 +55,8 @@ router = APIRouter()
 
 @router.post("/distribution_shift", response_model=BatchDistributionShiftResponse)
 def distribution_shift(request: BatchDistributionShiftRequest):
+    logger.debug("calling distribution_shift")
+
     # Construct a DataFrame from the list of requests
     data = []
     for req in request.requests:

@@ -7,6 +7,9 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sentence_transformers import SentenceTransformer
 
+# module imports
+from logger_config import logger
+
 # ==========================================================================
 # Module variables
 # ==========================================================================
@@ -141,6 +144,8 @@ def encode_data(merged_df: pd.DataFrame, training: bool = True) -> pd.DataFrame:
     Returns:
     - pd.DataFrame: DataFrame containing the encoded data.
     """
+    logger.debug("calling encode_data")
+
     x_numerical_standardized = encode_numerical(merged_df, training=training)
     x_categorical_scaled = encode_categorical(merged_df, training=training)
     x_textual_scaled = encode_textual(merged_df)

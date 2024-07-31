@@ -5,6 +5,9 @@ from io import StringIO
 from tqdm import tqdm
 import pandas as pd
 
+# module imports
+from logger_config import logger
+
 # ==========================================================================
 # Utils functions
 # ==========================================================================
@@ -52,6 +55,8 @@ def load_dataframe(file_path: str) -> pd.DataFrame:
     """
     Load data into a pandas DataFrame.
     """
+    logger.debug("calling load_dataframe")
+
     try:
         if file_path.endswith(".parquet"):
             return pd.read_parquet(file_path)

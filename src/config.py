@@ -1,4 +1,6 @@
 import os
+import logging
+import logging.config
 
 # ==========================================================================
 # User defined
@@ -28,3 +30,40 @@ BASE_PATH_DATA = os.path.join(PATH_PROJECT, "data")
 
 MODEL_PATH_OUTLIER = os.path.join(BASE_PATH_MODEL, FILENAME_OUTLIER)
 MODEL_PATH_STANDARDIZER = os.path.join(BASE_PATH_MODEL, FILENAME_STANDARDIZER)
+
+# ==========================================================================
+# logging
+# ==========================================================================
+
+logging_config = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "formatter": "standard",
+            "filename": "app.log",
+        },
+    },
+    "loggers": {
+        "": {  # root logger
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
+
+logging.config.dictConfig(logging_config)
+logger = logging.getLogger(__name__)

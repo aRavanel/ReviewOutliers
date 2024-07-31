@@ -1,6 +1,9 @@
 import numpy as np
 from scipy.stats import ks_2samp
 
+# module imports
+from logger_config import logger
+
 # ==========================================================================
 # Module variables
 # ==========================================================================
@@ -91,6 +94,8 @@ def distribution_shift_scoring(samples: np.ndarray, method: str = "psi") -> floa
     Returns:
     - float: Distribution shift score.
     """
+    logger.debug("calling distribution_shift_scoring")
+
     if method not in {"psi", "ks"}:
         raise ValueError("Method must be either 'psi' or 'ks'.")
 

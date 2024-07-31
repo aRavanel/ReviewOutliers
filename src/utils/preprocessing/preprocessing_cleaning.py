@@ -1,5 +1,7 @@
 import pandas as pd
 
+# module imports
+from logger_config import logger
 
 # ==========================================================================
 # Utils functions

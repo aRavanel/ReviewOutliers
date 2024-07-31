@@ -3,6 +3,7 @@ import pandas as pd
 # module imports
 from src.utils.preprocessing.preprocessing_encoding import encode_data
 from src.utils.preprocessing.preprocessing_cleaning import clean_enrich
+from logger_config import logger
 
 # ==========================================================================
 # Module variables
@@ -13,6 +14,8 @@ from src.utils.preprocessing.preprocessing_cleaning import clean_enrich
 # Exported functions
 # ==========================================================================
 def merge_dataframes(df_metadata: pd.DataFrame, df_review: pd.DataFrame, max_samples: int = 10_000):
+
+    logger.debug("calling merge_dataframes")
 
     # Validate inputs
     if df_metadata.empty or df_review.empty:
@@ -38,6 +41,9 @@ def preprocess_data(merged_df: pd.DataFrame, training: bool = True) -> pd.DataFr
     """
     clean, enrich and encode the data
     """
+
+    logger.debug("calling preprocess_data")
+
     merged_df = clean_enrich(merged_df)
     combined_df = encode_data(merged_df, training=training)
 

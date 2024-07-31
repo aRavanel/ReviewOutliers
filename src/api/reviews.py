@@ -2,6 +2,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
 
+# module imports
+from logger_config import logger
+
 
 # ==========================================================================
 # Shema and module variables
@@ -32,6 +35,7 @@ async def read_root():
     """
     Root endpoint to return a welcome message.
     """
+    logger.debug("calling read_root")
     return {"message": "Welcome to the Review Outliers API"}
 
 
@@ -40,6 +44,7 @@ async def get_reviews():
     """
     Get all reviews.
     """
+    logger.debug("calling get_reviews")
     return reviews_db
 
 

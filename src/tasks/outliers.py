@@ -5,6 +5,9 @@ from pyod.models.iforest import IForest
 import pandas as pd
 import numpy as np
 
+# module imports
+from logger_config import logger
+
 
 # ==========================================================================
 # Utils functions and module
@@ -44,6 +47,7 @@ def outlier_detection(df: pd.DataFrame, training: bool = True) -> Tuple[np.ndarr
     scores > 0   ->   outlier
     Predict outliers and compute scores for the test set.
     """
+    logger.debug("calling outlier_detection")
 
     match MODEL_NAME_OUTLIER:
         case "isolation_forest":

@@ -6,6 +6,7 @@ import pandas as pd
 
 # module imports
 from src.tasks.outliers import outlier_detection
+from logger_config import logger
 
 
 # ==========================================================================
@@ -51,6 +52,8 @@ router = APIRouter()
 
 @router.post("/detect_outliers", response_model=OutlierDetectionResponse)
 def detect_outliers(request: BatchOutlierDetectionRequest):
+
+    logger.debug("calling detect_outliers")
 
     data = []
     for req in request.requests:

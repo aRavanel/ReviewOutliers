@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 # Import the routers for different endpoints
 from src.api import reviews, outlier_detection, distribution_shift
+from logger_config import logger
 
 # Create a FastAPI application
 app = FastAPI()
@@ -19,4 +20,6 @@ def read_root():
     Root endpoint for the Outlier Detection and Distribution Shift API.
     Returns a welcome message.
     """
+    logger.debug("calling read_root")
+
     return {"message": "Welcome 👋 to the Outlier Detection and Distribution Shift API"}
