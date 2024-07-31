@@ -21,8 +21,8 @@ def save_model_outlier(model) -> None:
         with open(MODEL_PATH_OUTLIER, "wb") as file:
             pickle.dump(model, file)
     except IOError as e:
-        print(f"Error saving the model: {e}")
-        print(f"Current Directory: {os.getcwd()}")
+        logger.error(f"Error saving the model: {e}")
+        logger.info(f"Current Directory: {os.getcwd()}")
 
 
 def load_model_outlier():
@@ -32,7 +32,7 @@ def load_model_outlier():
             model = pickle.load(file)
         return model
     except IOError as e:
-        print(f"Error loading the model: {e}")
+        logger.error(f"Error loading the model: {e}")
         raise e
 
 

@@ -48,7 +48,7 @@ def decompress_to_json(gz_filename, json_path):
     # dumps it into json file
     with open(json_path, "w", encoding="utf-8") as json_file:
         json.dump(json_list, json_file, indent=4)
-    print(f"Decompressed and saved to {json_path}")
+    logger.info(f"Decompressed and saved to {json_path}")
 
 
 def load_dataframe(file_path: str) -> pd.DataFrame:
@@ -69,6 +69,6 @@ def load_dataframe(file_path: str) -> pd.DataFrame:
         else:
             raise ValueError(f"Unsupported file format: {file_path}")
     except FileNotFoundError:
-        print(f"File not found: {file_path}")
-        print(f"Current working directory: {os.getcwd()}")
+        logger.error(f"File not found: {file_path}")
+        logger.info(f"Current working directory: {os.getcwd()}")
         raise
