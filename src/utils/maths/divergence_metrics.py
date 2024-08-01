@@ -55,11 +55,12 @@ def ks_test_score(train_data: np.ndarray, test_data: np.ndarray) -> float:
     The KS test is a statistical test used to compare the cumulative distribution functions of two datasets.
     It is widely used in statistics and engineering to determine if two datasets come from the same parent distribution.
     """
-    ks_stat, _ = ks_2samp(train_data, test_data)
-    return ks_stat
+    result = ks_2samp(train_data, test_data, alternative="two-sided", method="auto")
+
+    return float(result.statistic)
 
 
-def psi(expected_array: np.ndarray, actual_array: np.ndarray, buckets: int = 10):
+def psi(expected_array: np.ndarray, actual_array: np.ndarray, buckets: int = 10) -> float:
     """
     This function calculates the Percentage of the Sample (PSI) which is a measure of the degree
     of divergence between two probability distributions.
@@ -75,7 +76,7 @@ def psi(expected_array: np.ndarray, actual_array: np.ndarray, buckets: int = 10)
     psi_value = np.sum(
         (expected_percents - actual_percents) * np.log((expected_percents + EPSILON) / (actual_percents + EPSILON))
     )
-    return psi_value
+    return float(psi_value)
 
 
 # ==========================================================================

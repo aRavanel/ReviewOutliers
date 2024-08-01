@@ -85,7 +85,12 @@ def encode_categorical(merged_df: pd.DataFrame, training: bool = True) -> np.nda
 
         encoded_data = encoder.transform(merged_df[[cat_feature]])
         num_categories = encoded_data.shape[1]
-        scaled_data = encoded_data / num_categories
+
+        if isinstance(encoded_data, np.ndarray):
+            scaled_data = encoded_data / num_categories
+        else:  # sparse matrix case
+            scaled_data = encoded_data.toarray() / num_categories
+
         x_categorical_scaled.append(scaled_data)
 
     return np.hstack(x_categorical_scaled)

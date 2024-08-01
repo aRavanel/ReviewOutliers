@@ -46,7 +46,14 @@ def distribution_shift_scoring(samples: np.ndarray, method: str = "psi") -> floa
     elif method == "ks":
         score = ks_test_score(initial_distribution, samples)
 
+    elif method == "kl":
+        score = kl_divergence(initial_distribution, samples)
+
+    elif method == "js":
+        score = js_divergence(initial_distribution, samples)
+
     else:
+        score = 0.0
         raise NotImplementedError
 
     return score

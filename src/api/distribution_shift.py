@@ -2,7 +2,6 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Any, Dict
-import os
 import pandas as pd
 
 # module imports
