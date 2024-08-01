@@ -20,7 +20,7 @@ from src.utils.maths.divergence_metrics import (
 # ==========================================================================
 
 
-def distribution_shift_scoring(samples: np.ndarray, method: str = "psi") -> float:
+def distribution_shift_scoring(initial_distribution, samples: np.ndarray, method: str = "psi") -> float:
     """
     Calculates the distribution shift score using the specified method.
 
@@ -35,9 +35,6 @@ def distribution_shift_scoring(samples: np.ndarray, method: str = "psi") -> floa
 
     if method not in {"psi", "ks"}:
         raise ValueError("Method must be either 'psi' or 'ks'.")
-
-    # load first distribution serving as comparison
-    initial_distribution = samples
 
     # compute the distribution shfit scores
     if method == "psi":

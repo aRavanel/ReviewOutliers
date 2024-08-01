@@ -16,6 +16,9 @@ MODEL_NAME_OUTLIER = "isolation_forest"
 FILENAME_OUTLIER = "model_outlier.pkl"
 FILENAME_STANDARDIZER = "standardizer.pkl"
 
+# logging level
+LOGGING_LEVEL = "DEBUG"  # DEBUG. INFO, WARNING, ERROR
+
 # ==========================================================================
 # paths variables
 # ==========================================================================
@@ -48,12 +51,12 @@ logging_config = {
     },
     "handlers": {
         "console": {
-            "level": "DEBUG",
+            "level": LOGGING_LEVEL,
             "class": "logging.StreamHandler",
             "formatter": "standard",
         },
         "file": {
-            "level": "DEBUG",
+            "level": LOGGING_LEVEL,
             "class": "logging.FileHandler",
             "formatter": "standard",
             "filename": os.path.join(
@@ -65,8 +68,13 @@ logging_config = {
     "loggers": {
         "": {  # root logger
             "handlers": ["console", "file"],
-            "level": "DEBUG",
+            "level": LOGGING_LEVEL,
             "propagate": True,
+        },
+        "matplotlib.font_manager": {  # specific logger
+            "handlers": ["console", "file"],
+            "level": "WARNING",
+            "propagate": False,
         },
     },
 }
