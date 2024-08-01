@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from datetime import datetime
-from typing import List
+from typing import List, Any, Dict
 import os
 import pandas as pd
 
@@ -9,11 +9,12 @@ import pandas as pd
 from src.utils.preprocessing.preprocessing import preprocess_data
 from src.tasks.distribution_shift import distribution_shift_scoring
 from src.config import logger
-
+import logging
 
 # ==========================================================================
 # Schema and module variables
 # ==========================================================================
+router = APIRouter()
 
 
 # Define request and response models
@@ -27,7 +28,7 @@ class DistributionShiftRequest(BaseModel):
     rating: float
     title_metadata: str
     text: str
-    timestamp: datetime
+    timestamp: str
     helpful_vote: int
     verified_purchase: bool
 
@@ -44,9 +45,47 @@ class BatchDistributionShiftResponse(BaseModel):
     responses: List[DistributionShiftResponse]
 
 
-router = APIRouter()
+# ==========================================================================
+# Utilities
+# ==========================================================================
 
-# load the model
+
+def create_distribution_shift_request(data: Dict[str, Any]) -> DistributionShiftRequest:
+    """
+    To Force the data into the shema. Useful for debugging.
+    """
+    dummy_values = {
+        "main_category": "unknown",
+        "title_review": "No title",
+        "average_rating": 0.0,
+        "rating_number": 0,
+        "features": [],
+        "store": "unknown",
+        "rating": 0.0,
+        "title_metadata": "No title",
+        "text": "No text",
+        "timestamp": datetime(1970, 1, 1),
+        "helpful_vote": 0,
+        "verified_purchase": False,
+    }
+
+    filled_data = {}
+    for field in DistributionShiftRequest.model_fields:
+        if field in data:
+            if field == "timestamp" and isinstance(data[field], (pd.Timestamp, datetime)):
+                filled_data[field] = data[field].isoformat()
+            else:
+                filled_data[field] = data[field]
+        else:
+            filled_data[field] = dummy_values[field]
+            logging.warning(f"Missing field '{field}', filled with dummy value '{dummy_values[field]}'.")
+    return DistributionShiftRequest(**filled_data)
+
+
+def create_batch_distribution_shift_request(data_list: List[Dict[str, Any]]) -> BatchDistributionShiftRequest:
+    requests = [create_distribution_shift_request(data) for data in data_list]
+    return BatchDistributionShiftRequest(requests=requests)
+
 
 # ==========================================================================
 # Exported functions

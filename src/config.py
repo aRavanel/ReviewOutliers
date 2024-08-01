@@ -31,6 +31,9 @@ BASE_PATH_DATA = os.path.join(PATH_PROJECT, "data")
 MODEL_PATH_OUTLIER = os.path.join(BASE_PATH_MODEL, FILENAME_OUTLIER)
 MODEL_PATH_STANDARDIZER = os.path.join(BASE_PATH_MODEL, FILENAME_STANDARDIZER)
 
+LOG_DIR = os.path.join(PATH_PROJECT, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
 # ==========================================================================
 # logging
 # ==========================================================================
@@ -53,7 +56,10 @@ logging_config = {
             "level": "DEBUG",
             "class": "logging.FileHandler",
             "formatter": "standard",
-            "filename": "app.log",
+            "filename": os.path.join(
+                LOG_DIR, "app.log"
+            ),  # else if relative path can cause issue if launcher from other folder
+            "mode": "w",  # Open the log file in write mode to overwrite it each time
         },
     },
     "loggers": {
@@ -64,6 +70,5 @@ logging_config = {
         },
     },
 }
-
 logging.config.dictConfig(logging_config)
 logger = logging.getLogger(__name__)

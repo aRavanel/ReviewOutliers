@@ -9,7 +9,7 @@ app = FastAPI()
 
 # Include the routers for different endpoints with appropriate prefixes
 app.include_router(reviews.router, prefix="/api/reviews")  # For reviews endpoints
-app.include_router(outlier_detection.router, prefix="/api")  # For outlier detection endpoints
+app.include_router(outlier_detection.router, prefix="/api/detect_outliers")  # For outlier detection endpoints
 app.include_router(distribution_shift.router, prefix="/api")  # For distribution shift scoring endpoints
 
 

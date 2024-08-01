@@ -56,6 +56,7 @@ def load_dataframe(file_path: str) -> pd.DataFrame:
     Load data into a pandas DataFrame.
     """
     logger.debug("calling load_dataframe")
+    logger.info(f"Current working directory: {os.getcwd()}")
 
     try:
         if file_path.endswith(".parquet"):

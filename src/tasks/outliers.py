@@ -13,6 +13,7 @@ from src.config import logger
 # Utils functions and module
 # ==========================================================================
 from src.config import MODEL_NAME_OUTLIER, MODEL_PATH_OUTLIER
+from src.utils.preprocessing.preprocessing import preprocess_data
 
 
 def save_model_outlier(model) -> None:
@@ -49,6 +50,14 @@ def outlier_detection(df: pd.DataFrame, training: bool = True) -> Tuple[np.ndarr
     """
     logger.debug("calling outlier_detection")
 
+    logger.debug("DataFrame being passed to the model:")
+    logger.debug(df)
+
+    # clean, enrich, encode the data
+    # TODO : have one specific preprocessing per model
+    df = preprocess_data(df, training=False)
+
+    # outlier detection
     match MODEL_NAME_OUTLIER:
         case "isolation_forest":
             if training:
