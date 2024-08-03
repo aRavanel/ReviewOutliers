@@ -29,7 +29,7 @@ def merge_dataframes(df_metadata: pd.DataFrame, df_review: pd.DataFrame, max_sam
         df_review, df_metadata, on="parent_asin", how="inner", suffixes=("_review", "_metadata"), validate="many_to_one"
     )
     merged_df = merged_df.dropna(subset=["asin", "parent_asin"])
-    merged_df = merged_df.drop(columns=["parent_asin", "asin"])  # those features will be OOD at inference for new data
+    
 
     # limit to wanted sample size, random_state for reproducibility
     merged_df = merged_df.sample(n=max_samples, random_state=42)

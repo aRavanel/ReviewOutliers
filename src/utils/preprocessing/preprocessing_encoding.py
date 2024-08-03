@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sentence_transformers import SentenceTransformer
+from textstat import flesch_kincaid_grade, gunning_fog, flesch_reading_ease
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # module imports
 from src.config import logger
@@ -110,8 +112,14 @@ def encode_textual(merged_df: pd.DataFrame):
     review_embeddings_scaled = review_embeddings / embedding_size
     metadata_embeddings_scaled = metadata_embeddings / embedding_size
 
-    # add some specific features
+    # sentiment using cosine
     good_embeddings = model_embeddings.encode(["Good product. I am happy"], show_progress_bar=False)
+    bad_embeddings = model_embeddings.encode(["I will never buy this product again. Bad Quality"], show_progress_bar=False)
+
+    # VADER SENTIMENT SCORE
+    sid = SentimentIntensityAnalyzer()
+    merged_df["SENTIMENT_SCORE"] = merged_df["REVIEW_TEXT"].apply(lambda d: sid.polarity_scores(d)["compound"])
+
     expensive_embeddings = model_embeddings.encode(["Very expensive."], show_progress_bar=False)
     scam_embeddings = model_embeddings.encode(["This is a scam. Do not buy."], show_progress_bar=False)
     error_embeddings = model_embeddings.encode(
@@ -123,13 +131,40 @@ def encode_textual(merged_df: pd.DataFrame):
     expensive_similarity = np.dot(review_embeddings_scaled, expensive_embeddings.T)
     scam_similarity = np.dot(review_embeddings_scaled, scam_embeddings.T)
     error_similarity = np.dot(review_embeddings_scaled, error_embeddings.T)
-    specific_features = np.hstack((good_similarity, expensive_similarity, scam_similarity, error_similarity))
-    specific_features = specific_features / len(specific_features)
+
+    # Compute readability scores
+    readability_flesch_kincaid = merged_df["text_review"].apply(flesch_kincaid_grade).values.reshape(-1, 1)
+    readability_gunning_fog = merged_df["text_review"].apply(gunning_fog).values.reshape(-1, 1)
+    readability_gunning_fre = merged_df["text_review"].apply(flesch_reading_ease).values.reshape(-1, 1)
+
+    # Length-based features
+    review_length_char = merged_df["text_review"].apply(len).values.reshape(-1, 1)
+    review_length_word = merged_df["text_review"].apply(lambda x: len(x.split())).values.reshape(-1, 1)
+    review_length_sentence = merged_df["text_review"].apply(lambda x: len(x.split("."))).values.reshape(-1, 1)
+
+    # Interaction features
+    interaction_scores = np.dot(review_embeddings_scaled, metadata_embeddings_scaled.T).diagonal().reshape(-1, 1)
 
     # embeddings tuple
-    embeddings = (review_embeddings_scaled, metadata_embeddings_scaled, specific_features)
+    # specific_features = np.hstack((good_similarity, expensive_similarity, scam_similarity, error_similarity))
+    # specific_features = specific_features / len(specific_features)
+    # embeddings = (review_embeddings_scaled, metadata_embeddings_scaled, specific_features)
+    # return np.hstack(embeddings)
 
-    return np.hstack(embeddings)
+    specific_features = (
+        good_similarity,
+        expensive_similarity,
+        scam_similarity,
+        error_similarity,
+        readability_flesch_kincaid,
+        readability_gunning_fog,
+        review_length_char,
+        review_length_word,
+        review_length_sentence,
+        interaction_scores,
+    )
+
+    return np.hstack(specific_features)
 
 
 # ==========================================================================
