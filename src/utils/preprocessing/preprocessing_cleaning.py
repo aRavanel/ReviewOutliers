@@ -33,16 +33,12 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
     df["day"] = df["timestamp"].dt.day
     df["hour"] = df["timestamp"].dt.hour
 
-    # Product based
-    average_ratings = df.groupby("asin")["rating"].mean()
-    df["average_rating_product"] = df["asin"].map(average_ratings)
-    df["rating_deviation"] = abs(df["rating"] - df["average_rating"])
-
-    # User based
+    # User based rating
     average_ratings_user = df.groupby("user_id")["rating"].mean()
     count_ratings_user = df.groupby("user_id")["rating"].count()
     df["average_rating_user"] = df["user_id"].map(average_ratings_user)
     df["count_rating_user"] = df["user_id"].map(count_ratings_user)
+    df["rating_deviation"] = abs(df["average_rating"] - df["average_rating_user"])
 
     # total number of reviews
     num_reviews = df.groupby("asin").size()
@@ -65,7 +61,8 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
     df["text_metadata"] = df[["title_metadata", "features"]].astype(str).agg("/n/n".join, axis=1)
 
     # Handle missing values - numeric
-    numeric_fields = {
+    df["average_rating"] = df["average_rating"].fillna(-1).astype("float")
+    int_fields = {
         "year",
         "month",
         "day",
@@ -75,9 +72,9 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
         "verified_purchase",
         "rating_number",
     }
-    for field in numeric_fields:
+    for field in int_fields:
         df[field] = df[field].fillna(-1).astype(int)
-    df["average_rating"] = df["average_rating"].fillna(-1).astype("float")
+
     # df_metadata['price'] = df_metadata['price'].fillna(-1).astype("float")
 
     # Drop features that are too complex, not informative, or have been transformed

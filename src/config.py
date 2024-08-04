@@ -10,7 +10,7 @@ import logging.config
 MODEL_NAME_EMBEDDINGS = "all-MiniLM-L6-v2"  # dim : 384, max_len : 256
 
 # outlier model name from pyod
-MODEL_NAME_OUTLIER = "isolation_forest"
+MODEL_NAME_OUTLIER = "one-class-svm"  # "one-class-svm", "isolation_forest"
 
 # pickle names
 FILENAME_OUTLIER = "model_outlier.pkl"
