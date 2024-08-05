@@ -7,6 +7,7 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sentence_transformers import SentenceTransformer
 from textstat import flesch_kincaid_grade, gunning_fog, flesch_reading_ease
+import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # module imports
@@ -23,6 +24,9 @@ from src.config import (
 
 # pickled models
 model_embeddings = SentenceTransformer(MODEL_NAME_EMBEDDINGS)  # text embeddings
+
+# download resources
+nltk.download("vader_lexicon")
 
 # ==========================================================================
 # Utils functions
@@ -98,78 +102,72 @@ def encode_categorical(merged_df: pd.DataFrame, training: bool = True) -> np.nda
     return np.hstack(x_categorical_scaled)
 
 
-def encode_textual(merged_df: pd.DataFrame):
-    """
-    Encode textual features using a model and scale the embeddings.
-    """
+# def encode_textual(merged_df: pd.DataFrame):
+#     """
+#     Encode textual features using a model and scale the embeddings.
+#     """
 
-    # compute embeddings
-    review_embeddings = model_embeddings.encode(merged_df["text_review"].tolist(), show_progress_bar=True)
-    metadata_embeddings = model_embeddings.encode(merged_df["text_metadata"].tolist(), show_progress_bar=True)
+#     # compute embeddings
+#     review_embeddings = model_embeddings.encode(merged_df["text_review"].tolist(), show_progress_bar=True)
+#     metadata_embeddings = model_embeddings.encode(merged_df["text_metadata"].tolist(), show_progress_bar=True)
 
-    # scale the embeddings
-    embedding_size = model_embeddings.get_sentence_embedding_dimension()
-    review_embeddings_scaled = review_embeddings / embedding_size
-    metadata_embeddings_scaled = metadata_embeddings / embedding_size
+#     # VADER SENTIMENT SCORE
+#     sid = SentimentIntensityAnalyzer()
+#     merged_df["sentiment_score"] = merged_df["text_review"].apply(lambda d: sid.polarity_scores(d)["compound"])
 
-    # sentiment using cosine
-    good_embeddings = model_embeddings.encode(["Good product. I am happy"], show_progress_bar=False)
-    bad_embeddings = model_embeddings.encode(["I will never buy this product again. Bad Quality"], show_progress_bar=False)
+#     # sentiment embeddings + cosing similarity
+#     sentiment_phrases = {
+#         "good": "Good product. I am happy",
+#         "bad": "I will never buy this product again. Bad Quality",
+#         "expensive": "Very expensive.",
+#         "scam": "This is a scam. Do not buy.",
+#         "error": "There was an error in the product. The delivery had an issue. Wrong product.",
+#     }
+#     sentiment_embeddings = {k: model_embeddings.encode([v], show_progress_bar=False) for k, v in sentiment_phrases.items()}
+#     sentiment_similarities = {
+#         k: np.dot(review_embeddings, v.T).flatten().reshape(-1, 1) for k, v in sentiment_embeddings.items()
+#     }
 
-    # VADER SENTIMENT SCORE
-    sid = SentimentIntensityAnalyzer()
-    merged_df["SENTIMENT_SCORE"] = merged_df["REVIEW_TEXT"].apply(lambda d: sid.polarity_scores(d)["compound"])
+#     # Compute readability scores
+#     readability_scores = {
+#         "flesch_kincaid": merged_df["text_review"].apply(flesch_kincaid_grade).values.reshape(-1, 1),
+#         "gunning_fog": merged_df["text_review"].apply(gunning_fog).values.reshape(-1, 1),
+#         "flesch_reading_ease": merged_df["text_review"].apply(flesch_reading_ease).values.reshape(-1, 1),
+#     }
 
-    expensive_embeddings = model_embeddings.encode(["Very expensive."], show_progress_bar=False)
-    scam_embeddings = model_embeddings.encode(["This is a scam. Do not buy."], show_progress_bar=False)
-    error_embeddings = model_embeddings.encode(
-        ["There was an error in the product. The delivery had an issue. Wrong product."], show_progress_bar=False
-    )
+#     # Length-based features
+#     length_features = {
+#         "length_char": merged_df["text_review"].apply(len).values.reshape(-1, 1),
+#         "length_word": merged_df["text_review"].apply(lambda x: len(x.split())).values.reshape(-1, 1),
+#         "length_sentence": merged_df["text_review"].apply(lambda x: len(x.split("."))).values.reshape(-1, 1),
+#     }
 
-    # compute cosine similarity of review with the specific features above
-    good_similarity = np.dot(review_embeddings_scaled, good_embeddings.T)
-    expensive_similarity = np.dot(review_embeddings_scaled, expensive_embeddings.T)
-    scam_similarity = np.dot(review_embeddings_scaled, scam_embeddings.T)
-    error_similarity = np.dot(review_embeddings_scaled, error_embeddings.T)
+#     # Interaction features
+#     interaction_scores = np.dot(review_embeddings, metadata_embeddings.T).diagonal().reshape(-1, 1)
 
-    # Compute readability scores
-    readability_flesch_kincaid = merged_df["text_review"].apply(flesch_kincaid_grade).values.reshape(-1, 1)
-    readability_gunning_fog = merged_df["text_review"].apply(gunning_fog).values.reshape(-1, 1)
-    readability_gunning_fre = merged_df["text_review"].apply(flesch_reading_ease).values.reshape(-1, 1)
+#     # embeddings tuple
+#     # embedding_size = model_embeddings.get_sentence_embedding_dimension()
+#     # review_embeddings_scaled = review_embeddings / embedding_size
+#     # metadata_embeddings_scaled = metadata_embeddings / embedding_size
+#     # specific_features = np.hstack((good_similarity, expensive_similarity, scam_similarity, error_similarity))
+#     # specific_features = specific_features / len(specific_features)
+#     # embeddings = (review_embeddings_scaled, metadata_embeddings_scaled, specific_features)
+#     # return np.hstack(embeddings)
 
-    # Length-based features
-    review_length_char = merged_df["text_review"].apply(len).values.reshape(-1, 1)
-    review_length_word = merged_df["text_review"].apply(lambda x: len(x.split())).values.reshape(-1, 1)
-    review_length_sentence = merged_df["text_review"].apply(lambda x: len(x.split("."))).values.reshape(-1, 1)
+#     # Concatenate all features
+#     all_features = np.hstack(
+#         list(sentiment_similarities.values())
+#         + list(readability_scores.values())
+#         + list(length_features.values())
+#         + [interaction_scores, merged_df["sentiment_score"].values.reshape(-1, 1)]
+#     )
 
-    # Interaction features
-    interaction_scores = np.dot(review_embeddings_scaled, metadata_embeddings_scaled.T).diagonal().reshape(-1, 1)
-
-    # embeddings tuple
-    # specific_features = np.hstack((good_similarity, expensive_similarity, scam_similarity, error_similarity))
-    # specific_features = specific_features / len(specific_features)
-    # embeddings = (review_embeddings_scaled, metadata_embeddings_scaled, specific_features)
-    # return np.hstack(embeddings)
-
-    specific_features = (
-        good_similarity,
-        expensive_similarity,
-        scam_similarity,
-        error_similarity,
-        readability_flesch_kincaid,
-        readability_gunning_fog,
-        review_length_char,
-        review_length_word,
-        review_length_sentence,
-        interaction_scores,
-    )
-
-    return np.hstack(specific_features)
+#     return all_features
 
 
-# ==========================================================================
-# Exported functions
-# ==========================================================================
+# # ==========================================================================
+# # Exported functions
+# # ==========================================================================
 
 
 def encode_data(merged_df: pd.DataFrame, training: bool = True) -> pd.DataFrame:
@@ -188,9 +186,7 @@ def encode_data(merged_df: pd.DataFrame, training: bool = True) -> pd.DataFrame:
 
     x_numerical_standardized = encode_numerical(merged_df, training=training)
     x_categorical_scaled = encode_categorical(merged_df, training=training)
-    x_textual_scaled = encode_textual(merged_df)
-
-    x_combined = np.hstack((x_numerical_standardized, x_categorical_scaled, x_textual_scaled))
+    x_combined = np.hstack((x_numerical_standardized, x_categorical_scaled))
     combined_df = pd.DataFrame(x_combined, columns=[f"feature_{i}" for i in range(x_combined.shape[1])])
 
     return combined_df

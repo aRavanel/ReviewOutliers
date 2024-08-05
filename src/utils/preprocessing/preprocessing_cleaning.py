@@ -1,15 +1,27 @@
+import numpy as np
 import pandas as pd
+from sentence_transformers import SentenceTransformer
+from textstat import flesch_kincaid_grade, gunning_fog, flesch_reading_ease
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # module imports
 from src.config import logger
 
 # ==========================================================================
+# Module variables
+# ==========================================================================
+from src.config import MODEL_NAME_EMBEDDINGS
+
+# pickled models
+model_embeddings = SentenceTransformer(MODEL_NAME_EMBEDDINGS)  # text embeddings
+
+# download resources
+nltk.download("vader_lexicon")
+
+
+# ==========================================================================
 # Utils functions
-# ==========================================================================
-
-
-# ==========================================================================
-# Exported functions
 # ==========================================================================
 
 
@@ -25,12 +37,6 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
     logger.debug("calling clean_enrich")
 
     df = df_in.copy()
-
-    # Find the most frequent label in the main_category column
-    main_label = df["main_category"].value_counts().idxmax()
-
-    # Filter the DataFrame to keep only rows with the most frequent label (some were in wrong category)
-    df = df[df["main_category"] == main_label]
 
     # Expand timestamp
     df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
@@ -69,6 +75,7 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
 
     # Handle missing values - numeric
     df["average_rating"] = df["average_rating"].fillna(-1).astype("float")
+    df["price"] = pd.to_numeric(df["price"], errors="coerce").fillna(-1)
     int_fields = {
         "year",
         "month",
@@ -82,25 +89,45 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
     for field in int_fields:
         df[field] = df[field].fillna(-1).astype(int)
 
-    # df_metadata['price'] = df_metadata['price'].fillna(-1).astype("float")
+    # Enrich textual data with
+    # -----------------------
+    # Compute embeddings
+    review_embeddings = model_embeddings.encode(df["text_review"].tolist(), show_progress_bar=True)
+    metadata_embeddings = model_embeddings.encode(df["text_metadata"].tolist(), show_progress_bar=True)
 
-    # features removed :
-    # - not generalizable: userid, asin, parent_asin
-    # - empty : verified_purchase
-    # - processed : timestamp,
-    # - processed : title_metadata, features, description
-    # - processed : title_review, text
+    # VADER Sentiment Score
+    sid = SentimentIntensityAnalyzer()
+    df["sentiment_score"] = df["text_review"].apply(lambda d: sid.polarity_scores(d)["compound"])
 
-    # feature to process better :
-    # - details
-    # - categories
+    # Sentiment embeddings + cosine similarity
+    sentiment_phrases = {
+        "good": "Good product. I am happy",
+        "bad": "I will never buy this product again. Bad Quality",
+        "expensive": "Very expensive.",
+        "scam": "This is a scam. Do not buy.",
+        "error": "There was an error in the product. The delivery had an issue. Wrong product.",
+    }
+    sentiment_embeddings = {k: model_embeddings.encode([v], show_progress_bar=False) for k, v in sentiment_phrases.items()}
+    for k, v in sentiment_embeddings.items():
+        df[f"similarity_{k}"] = np.dot(review_embeddings, v.T).flatten()
+
+    # Compute readability scores
+    df["flesch_kincaid"] = df["text_review"].apply(flesch_kincaid_grade)
+    df["gunning_fog"] = df["text_review"].apply(gunning_fog)
+    df["flesch_reading_ease"] = df["text_review"].apply(flesch_reading_ease)
+
+    # Length-based features
+    df["length_char"] = df["text_review"].apply(len)
+    df["length_word"] = df["text_review"].apply(lambda x: len(x.split()))
+    df["length_sentence"] = df["text_review"].apply(lambda x: len(x.split(".")))
+
+    # Interaction features
+    df["interaction_score"] = np.dot(review_embeddings, metadata_embeddings.T).diagonal()
 
     # Features to keep
     features_to_keep = [
         "main_category",
         "store",
-        "text_review",
-        "text_metadata",
         "average_rating",
         "year",
         "month",
@@ -112,11 +139,30 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
         "num_reviews",
         "rating_deviation",
         "price",
+        "similarity_good",
+        "similarity_bad",
+        "similarity_expensive",
+        "similarity_scam",
+        "similarity_error",
+        "length_char",
+        "length_word",
+        "length_sentence",
+        "interaction_score",
+        "sentiment_score",
+        "flesch_kincaid",
+        "gunning_fog",
+        "flesch_reading_ease",
     ]
+    # features removed :
+    # - not generalizable: userid, asin, parent_asin
+    # - empty : verified_purchase
+    # - processed : timestamp,
+    # - processed : text_metadata = title_metadata, features, description
+    # - processed : text_review = title_review, text
+    # feature to process better :
+    # - details
+    # - categories
 
     df = df[features_to_keep]
-
-    # drop duplicates (because less columns now)
-    df.drop_duplicates(inplace=True)
 
     return df
