@@ -1,7 +1,7 @@
 import os
 import requests
 from pathlib import Path
-from src.utils.io import decompress_to_json
+from src.utils.io.io import decompress_to_json
 
 # ==========================================================================
 # Utils functions

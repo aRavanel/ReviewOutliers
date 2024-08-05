@@ -26,6 +26,12 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
 
     df = df_in.copy()
 
+    # Find the most frequent label in the main_category column
+    main_label = df["main_category"].value_counts().idxmax()
+
+    # Filter the DataFrame to keep only rows with the most frequent label (some were in wrong category)
+    df = df[df["main_category"] == main_label]
+
     # Expand timestamp
     df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
     df["year"] = df["timestamp"].dt.year
@@ -58,7 +64,8 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
 
     df["title_metadata"] = df["title_metadata"].fillna("").astype("str")
     df["features"] = df["features"].apply(lambda x: " ".join(x) if isinstance(x, list) and x else "").astype("str")
-    df["text_metadata"] = df[["title_metadata", "features"]].astype(str).agg("/n/n".join, axis=1)
+    df["description"] = df["description"].apply(lambda x: " ".join(x) if isinstance(x, list) and x else "").astype("str")
+    df["text_metadata"] = df[["title_metadata", "description", "features"]].astype(str).agg("/n/n".join, axis=1)
 
     # Handle missing values - numeric
     df["average_rating"] = df["average_rating"].fillna(-1).astype("float")
@@ -77,25 +84,39 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
 
     # df_metadata['price'] = df_metadata['price'].fillna(-1).astype("float")
 
-    # Drop features that are too complex, not informative, or have been transformed
-    features_to_drop = [
-        "timestamp",  # processed
-        "title_review",  # processed
-        "title_metadata",  # processed
-        "features",  # processed
-        "user_id",  #
-        "images_review",  # too complex
-        "images_metadata",  # too complex
-        "videos",  # too complex
-        "details",  # mostly empty
-        "categories",  # mostly empty
-        "bought_together",  # mostly empty
-        "price",  # mostly empty
-        "description",  # mostly empty
-    ]
-    df.drop(columns=features_to_drop, inplace=True, errors="ignore")  # errors='ignore' in case already dropped
-    df.drop_duplicates(inplace=True)
+    # features removed :
+    # - not generalizable: userid, asin, parent_asin
+    # - empty : verified_purchase
+    # - processed : timestamp,
+    # - processed : title_metadata, features, description
+    # - processed : title_review, text
 
-    # merged_df = merged_df.drop(columns=["parent_asin", "asin"])  # those features will be OOD at inference for new data
+    # feature to process better :
+    # - details
+    # - categories
+
+    # Features to keep
+    features_to_keep = [
+        "main_category",
+        "store",
+        "text_review",
+        "text_metadata",
+        "average_rating",
+        "year",
+        "month",
+        "day",
+        "hour",
+        "rating",
+        "helpful_vote",
+        "rating_number",
+        "num_reviews",
+        "rating_deviation",
+        "price",
+    ]
+
+    df = df[features_to_keep]
+
+    # drop duplicates (because less columns now)
+    df.drop_duplicates(inplace=True)
 
     return df
