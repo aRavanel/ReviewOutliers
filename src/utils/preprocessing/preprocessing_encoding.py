@@ -1,14 +1,10 @@
 import os
 import pickle
-from typing import Any
+from typing import Any, List
 
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sentence_transformers import SentenceTransformer
-from textstat import flesch_kincaid_grade, gunning_fog, flesch_reading_ease
-import nltk
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # module imports
 from src.config import logger
@@ -17,16 +13,9 @@ from src.config import logger
 # Module variables
 # ==========================================================================
 from src.config import (
-    MODEL_NAME_EMBEDDINGS,
     MODEL_PATH_STANDARDIZER,
     BASE_PATH_MODEL,
 )
-
-# pickled models
-model_embeddings = SentenceTransformer(MODEL_NAME_EMBEDDINGS)  # text embeddings
-
-# download resources
-nltk.download("vader_lexicon")
 
 # ==========================================================================
 # Utils functions
@@ -52,10 +41,18 @@ def load_encoder(file_name: str) -> Any:
         return None
 
 
-def encode_numerical(merged_df: pd.DataFrame, training: bool = True):
+def encode_features(merged_df: pd.DataFrame, training: bool = True) -> np.ndarray:
     """
-    Scale numerical data: remove the mean and scale to unit variance.
+    Encode both numerical and categorical features.
+
+    Parameters:
+    - merged_df: pd.DataFrame: Dataframe containing the features.
+    - training: bool: Flag indicating if the encoding is for training or inference.
+
+    Returns:
+    - Tuple containing the standardized numerical features and scaled categorical features.
     """
+    # Encode numerical features
     numerical_features = merged_df.select_dtypes(include=["number"]).columns.tolist()
     if training:
         scaler_numerical = StandardScaler()
@@ -68,14 +65,8 @@ def encode_numerical(merged_df: pd.DataFrame, training: bool = True):
             raise ValueError("Failed to load the numerical scaler.")
 
     x_numerical_standardized = scaler_numerical.transform(merged_df[numerical_features].values)
-    return x_numerical_standardized
 
-
-def encode_categorical(merged_df: pd.DataFrame, training: bool = True) -> np.ndarray:
-    """
-    Encode categorical features
-    and scale them: so that they are not dominant when computing distances
-    """
+    # Encode categorical features
     categorical_features = merged_df.select_dtypes(include=["category", "bool"]).columns.tolist()
     x_categorical_scaled = []
 
@@ -99,70 +90,31 @@ def encode_categorical(merged_df: pd.DataFrame, training: bool = True) -> np.nda
 
         x_categorical_scaled.append(scaled_data)
 
-    return np.hstack(x_categorical_scaled)
+    x_categorical_scaled = (
+        np.hstack(x_categorical_scaled) if x_categorical_scaled else np.array([]).reshape(len(merged_df), 0)
+    )
 
+    # Diminish importance of specified columns in numerical features
+    def diminish_columns_numerical(x_numerical_standardized, column_list: List[str]):
+        for col in column_list:
+            if col in numerical_features:
+                idx = numerical_features.index(col)
+                x_numerical_standardized[:, idx] /= len(column_list)
+        return x_numerical_standardized
 
-# def encode_textual(merged_df: pd.DataFrame):
-#     """
-#     Encode textual features using a model and scale the embeddings.
-#     """
+    x_numerical_standardized = diminish_columns_numerical(x_numerical_standardized, ["year", "month", "day", "hour"])
+    x_numerical_standardized = diminish_columns_numerical(
+        x_numerical_standardized, ["sentiment_score", "similarity_good", "similarity_bad", "similarity_expensive"]
+    )
+    x_numerical_standardized = diminish_columns_numerical(x_numerical_standardized, ["similarity_scam", "similarity_error"])
+    x_numerical_standardized = diminish_columns_numerical(
+        x_numerical_standardized, ["readability", "length_char", "length_word"]
+    )
+    x_numerical_standardized = diminish_columns_numerical(
+        x_numerical_standardized, ["rating", "rating_deviation", "average_rating"]
+    )
 
-#     # compute embeddings
-#     review_embeddings = model_embeddings.encode(merged_df["text_review"].tolist(), show_progress_bar=True)
-#     metadata_embeddings = model_embeddings.encode(merged_df["text_metadata"].tolist(), show_progress_bar=True)
-
-#     # VADER SENTIMENT SCORE
-#     sid = SentimentIntensityAnalyzer()
-#     merged_df["sentiment_score"] = merged_df["text_review"].apply(lambda d: sid.polarity_scores(d)["compound"])
-
-#     # sentiment embeddings + cosing similarity
-#     sentiment_phrases = {
-#         "good": "Good product. I am happy",
-#         "bad": "I will never buy this product again. Bad Quality",
-#         "expensive": "Very expensive.",
-#         "scam": "This is a scam. Do not buy.",
-#         "error": "There was an error in the product. The delivery had an issue. Wrong product.",
-#     }
-#     sentiment_embeddings = {k: model_embeddings.encode([v], show_progress_bar=False) for k, v in sentiment_phrases.items()}
-#     sentiment_similarities = {
-#         k: np.dot(review_embeddings, v.T).flatten().reshape(-1, 1) for k, v in sentiment_embeddings.items()
-#     }
-
-#     # Compute readability scores
-#     readability_scores = {
-#         "flesch_kincaid": merged_df["text_review"].apply(flesch_kincaid_grade).values.reshape(-1, 1),
-#         "gunning_fog": merged_df["text_review"].apply(gunning_fog).values.reshape(-1, 1),
-#         "flesch_reading_ease": merged_df["text_review"].apply(flesch_reading_ease).values.reshape(-1, 1),
-#     }
-
-#     # Length-based features
-#     length_features = {
-#         "length_char": merged_df["text_review"].apply(len).values.reshape(-1, 1),
-#         "length_word": merged_df["text_review"].apply(lambda x: len(x.split())).values.reshape(-1, 1),
-#         "length_sentence": merged_df["text_review"].apply(lambda x: len(x.split("."))).values.reshape(-1, 1),
-#     }
-
-#     # Interaction features
-#     interaction_scores = np.dot(review_embeddings, metadata_embeddings.T).diagonal().reshape(-1, 1)
-
-#     # embeddings tuple
-#     # embedding_size = model_embeddings.get_sentence_embedding_dimension()
-#     # review_embeddings_scaled = review_embeddings / embedding_size
-#     # metadata_embeddings_scaled = metadata_embeddings / embedding_size
-#     # specific_features = np.hstack((good_similarity, expensive_similarity, scam_similarity, error_similarity))
-#     # specific_features = specific_features / len(specific_features)
-#     # embeddings = (review_embeddings_scaled, metadata_embeddings_scaled, specific_features)
-#     # return np.hstack(embeddings)
-
-#     # Concatenate all features
-#     all_features = np.hstack(
-#         list(sentiment_similarities.values())
-#         + list(readability_scores.values())
-#         + list(length_features.values())
-#         + [interaction_scores, merged_df["sentiment_score"].values.reshape(-1, 1)]
-#     )
-
-#     return all_features
+    return np.hstack((x_numerical_standardized, x_categorical_scaled))
 
 
 # # ==========================================================================
@@ -183,10 +135,7 @@ def encode_data(merged_df: pd.DataFrame, training: bool = True) -> pd.DataFrame:
     - pd.DataFrame: DataFrame containing the encoded data.
     """
     logger.debug("calling encode_data")
-
-    x_numerical_standardized = encode_numerical(merged_df, training=training)
-    x_categorical_scaled = encode_categorical(merged_df, training=training)
-    x_combined = np.hstack((x_numerical_standardized, x_categorical_scaled))
+    x_combined = encode_features(merged_df, training=training)
     combined_df = pd.DataFrame(x_combined, columns=[f"feature_{i}" for i in range(x_combined.shape[1])])
 
     return combined_df

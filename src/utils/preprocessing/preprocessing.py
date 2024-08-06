@@ -13,7 +13,20 @@ from src.config import logger
 # ==========================================================================
 # Exported functions
 # ==========================================================================
-def merge_dataframes(df_metadata: pd.DataFrame, df_review: pd.DataFrame, max_samples: int = 10_000):
+def merge_dataframes(df_metadata: pd.DataFrame, df_review: pd.DataFrame, max_samples: int = 10_000) -> pd.DataFrame:
+    """
+    Merges two pandas DataFrames, `df_metadata` and `df_review`, based on the 'parent_asin' column.
+    The function takes in the two DataFrames, `df_metadata` and `df_review`, and an optional
+    parameter `max_samples` which specifies the maximum number of samples to return.
+
+    Parameters:
+    - df_metadata (pd.DataFrame): The first DataFrame to merge.
+    - df_review (pd.DataFrame): The second DataFrame to merge.
+    - max_samples (int, optional): The maximum number of samples to return. Default is 10,000.
+
+    Returns:
+    - pd.DataFrame: The merged DataFrame.
+    """
 
     logger.debug("calling merge_dataframes")
 
@@ -43,12 +56,7 @@ def preprocess_data(merged_df: pd.DataFrame, training: bool = True, saved_name: 
 
     logger.debug("calling preprocess_data")
 
-    merged_df = clean_enrich(merged_df)
-
-    # save the enriched data for vizualization purpose
-    if saved_name != "":
-        merged_df.to_parquet(saved_name)
-
+    merged_df = clean_enrich(merged_df, saved_name=saved_name)
     combined_df = encode_data(merged_df, training=training)
 
     return combined_df

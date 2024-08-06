@@ -1,8 +1,12 @@
 import pandas as pd
 from typing import List
 
+# ==========================================================================
+# functions
+# ==========================================================================
 
-def drop_duplicates_with_unhashable(df: pd.DataFrame, ignore_columns: List[str] = None) -> pd.DataFrame:
+
+def drop_duplicates_with_unhashable(df: pd.DataFrame, ignore_columns: List[str] = []) -> pd.DataFrame:
     """
     Drops duplicates from the DataFrame considering unhashable columns.
 
@@ -13,8 +17,6 @@ def drop_duplicates_with_unhashable(df: pd.DataFrame, ignore_columns: List[str] 
     Returns:
     - pd.DataFrame: The DataFrame with duplicates removed.
     """
-    if ignore_columns is None:
-        ignore_columns = []
 
     # Function to detect unhashable columns
     def is_unhashable(series: pd.Series) -> bool:

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
-from textstat import flesch_kincaid_grade, gunning_fog, flesch_reading_ease
+from textstat import flesch_reading_ease  # flesch_kincaid_grade, gunning_fog,
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
@@ -14,18 +14,17 @@ from src.config import logger
 from src.config import MODEL_NAME_EMBEDDINGS
 
 # pickled models
-model_embeddings = SentenceTransformer(MODEL_NAME_EMBEDDINGS)  # text embeddings
+model_embeddings = SentenceTransformer(MODEL_NAME_EMBEDDINGS, trust_remote_code=True)  # text embeddings
 
 # download resources
 nltk.download("vader_lexicon")
-
 
 # ==========================================================================
 # Utils functions
 # ==========================================================================
 
 
-def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
+def clean_enrich(df_in: pd.DataFrame, saved_name: str = "") -> pd.DataFrame:
     """
     check here :
     https://github.com/yashpandey474/Identification-of-fake-reviews/blob/main/Code/Data_Processing/Feature_Extraction.py
@@ -111,15 +110,15 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
     for k, v in sentiment_embeddings.items():
         df[f"similarity_{k}"] = np.dot(review_embeddings, v.T).flatten()
 
-    # Compute readability scores
-    df["flesch_kincaid"] = df["text_review"].apply(flesch_kincaid_grade)
-    df["gunning_fog"] = df["text_review"].apply(gunning_fog)
-    df["flesch_reading_ease"] = df["text_review"].apply(flesch_reading_ease)
+    # Compute mean of several readability scores
+    # df["flesch_kincaid"] = df["text_review"].apply(flesch_kincaid_grade)
+    # df["gunning_fog"] = df["text_review"].apply(gunning_fog)
+    df["readability"] = df["text_review"].apply(flesch_reading_ease) / 100  # scale 0 - 100 with 100 easy to read
 
     # Length-based features
     df["length_char"] = df["text_review"].apply(len)
     df["length_word"] = df["text_review"].apply(lambda x: len(x.split()))
-    df["length_sentence"] = df["text_review"].apply(lambda x: len(x.split(".")))
+    # df["length_sentence"] = df["text_review"].apply(lambda x: len(x.split(".")))
 
     # Interaction features
     df["interaction_score"] = np.dot(review_embeddings, metadata_embeddings.T).diagonal()
@@ -146,12 +145,9 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
         "similarity_error",
         "length_char",
         "length_word",
-        "length_sentence",
         "interaction_score",
         "sentiment_score",
-        "flesch_kincaid",
-        "gunning_fog",
-        "flesch_reading_ease",
+        "readability",
     ]
     # features removed :
     # - not generalizable: userid, asin, parent_asin
@@ -162,6 +158,10 @@ def clean_enrich(df_in: pd.DataFrame) -> pd.DataFrame:
     # feature to process better :
     # - details
     # - categories
+
+    # save the enriched data for vizualization purpose
+    if saved_name != "":
+        df.to_parquet(saved_name)
 
     df = df[features_to_keep]
 

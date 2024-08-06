@@ -3,6 +3,9 @@ import pickle
 from typing import Tuple
 from pyod.models.iforest import IForest
 from pyod.models.ocsvm import OCSVM
+from pyod.models.suod import SUOD
+from pyod.models.lof import LOF
+from pyod.models.copod import COPOD
 import pandas as pd
 import numpy as np
 
@@ -56,10 +59,20 @@ def outlier_prediction(
     # outlier detection
     if training:
         match MODEL_NAME_OUTLIER:
+
             case "isolation_forest":
                 model = IForest(n_estimators=100, max_samples="auto", contamination=contamination, random_state=42)
+
             case "one-class-svm":
                 model = OCSVM(kernel="rbf", contamination=contamination)
+
+            case "ensemble":
+                # initialized a group of outlier detectors for acceleration
+                detector_list = [LOF(n_neighbors=15), LOF(n_neighbors=20), COPOD(), IForest(n_estimators=100)]
+
+                # decide the number of parallel process, and the combination method
+                model = SUOD(base_estimators=detector_list, n_jobs=2, combination="average", verbose=False)
+
             case _:
                 raise ValueError(f"Invalid model name: {MODEL_NAME_OUTLIER}")
 
@@ -94,11 +107,7 @@ def outlier_detection(df: pd.DataFrame, training: bool = True) -> Tuple[np.ndarr
     """
     logger.debug("calling outlier_detection")
 
-    logger.debug("DataFrame being passed to the model:")
-    logger.debug(df)
-
-    # clean, enrich, encode the data
-    # TODO : have one specific preprocessing per model
+    # clean, enrich, encode the data. TODO : have one specific preprocessing per model
     df = preprocess_data(df, training=False)
 
     # do the prediction
