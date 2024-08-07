@@ -19,9 +19,40 @@ model_embeddings = SentenceTransformer(MODEL_NAME_EMBEDDINGS, trust_remote_code=
 # download resources
 nltk.download("vader_lexicon")
 
+
 # ==========================================================================
 # Utils functions
 # ==========================================================================
+def convert_timestamp(ts):
+    """
+    Convert a timestamp to a datetime object.
+
+    Args:
+        ts (int, str, or pd.Timestamp): The timestamp to convert.
+            If the timestamp is an integer, it is treated as milliseconds
+            since epoch. If it is a string, it is parsed as a datetime string.
+            If it is already a pd.Timestamp object, it is returned as is.
+
+    Returns:
+        pd.Timestamp or None: The converted timestamp as a pd.Timestamp object,
+            or None if the timestamp could not be converted.
+    """
+    # Check if the timestamp is missing
+    if pd.isnull(ts):
+        return None
+    # Check if the timestamp is an integer (milliseconds since epoch)
+    if isinstance(ts, int):
+        # Convert from milliseconds since epoch to datetime
+        return pd.to_datetime(ts, unit="ms")
+    # Check if the timestamp is a string
+    elif isinstance(ts, str):
+        # Try to parse the string timestamp
+        try:
+            return pd.to_datetime(ts)
+        except ValueError:
+            return None
+    # Return the timestamp as is if it is already a pd.Timestamp object
+    return ts
 
 
 def clean_enrich(df_in: pd.DataFrame, saved_name: str = "") -> pd.DataFrame:
@@ -42,7 +73,7 @@ def clean_enrich(df_in: pd.DataFrame, saved_name: str = "") -> pd.DataFrame:
     df = df_in.copy()
 
     # Expand timestamp
-    df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
+    df["timestamp"] = df["timestamp"].apply(convert_timestamp)
     df["year"] = df["timestamp"].dt.year
     df["month"] = df["timestamp"].dt.month
     df["day"] = df["timestamp"].dt.day
@@ -66,7 +97,6 @@ def clean_enrich(df_in: pd.DataFrame, saved_name: str = "") -> pd.DataFrame:
         df["num_reviews"] = 1
 
     # Handle missing values - categories
-    df["main_category"] = df["main_category"].fillna("unknown").astype("category")
     df["store"] = df["store"].fillna("unknown").astype("category")
 
     # Handle missing values - str
