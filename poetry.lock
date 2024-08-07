@@ -618,6 +618,25 @@ files = [
 ]
 
 [[package]]
+name = "combo"
+version = "0.1.3"
+description = "A Python Toolbox for Machine Learning Model Combination"
+optional = false
+python-versions = "*"
+files = [
+    {file = "combo-0.1.3.tar.gz", hash = "sha256:6536d6d2f0a7a3a136c2127ba82c4bd640fc245c282c2d0060ad49070e57f42a"},
+]
+
+[package.dependencies]
+joblib = "*"
+matplotlib = "*"
+numba = ">=0.35"
+numpy = ">=1.13"
+pyod = "*"
+scikit_learn = ">=0.20"
+scipy = "*"
+
+[[package]]
 name = "comm"
 version = "0.2.2"
 description = "Jupyter Python Comm implementation, for usage in ipykernel, xeus-python etc."
@@ -1351,6 +1370,26 @@ files = [
     {file = "h11-0.14.0-py3-none-any.whl", hash = "sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761"},
     {file = "h11-0.14.0.tar.gz", hash = "sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d"},
 ]
+
+[[package]]
+name = "hdbscan"
+version = "0.8.38.post1"
+description = "Clustering based on density with variable density clusters"
+optional = false
+python-versions = "*"
+files = [
+    {file = "hdbscan-0.8.38.post1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:aaf515c5e3e22b61c5200271a8fc9219c1851abdc2dcf89231cd5142f9abb1c1"},
+    {file = "hdbscan-0.8.38.post1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cdf1a532d1a6395b3ac90cca694676b41306bbcee78ccba77b75700d29ca6292"},
+    {file = "hdbscan-0.8.38.post1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:21cb0d7c453ba96fb3b1f1595385a6485e51c4e7c16a73337b47f2f7075c7f16"},
+    {file = "hdbscan-0.8.38.post1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d9da363d479d33e61e743affa53675e17e571ab261c3674b3764b478b06532c4"},
+    {file = "hdbscan-0.8.38.post1.tar.gz", hash = "sha256:5fbdba2ffb5a99a8b52fa2915658ced6bed59f4d0d5f40b1c673646c928aac0b"},
+]
+
+[package.dependencies]
+joblib = ">=1.0"
+numpy = ">=1.20,<3"
+scikit-learn = ">=0.20"
+scipy = ">=1.0"
 
 [[package]]
 name = "htmlmin"
@@ -2757,6 +2796,31 @@ extra = ["lxml (>=4.6)", "pydot (>=2.0)", "pygraphviz (>=1.12)", "sympy (>=1.10)
 test = ["pytest (>=7.2)", "pytest-cov (>=4.0)"]
 
 [[package]]
+name = "nltk"
+version = "3.8.1"
+description = "Natural Language Toolkit"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "nltk-3.8.1-py3-none-any.whl", hash = "sha256:fd5c9109f976fa86bcadba8f91e47f5e9293bd034474752e92a520f81c93dda5"},
+    {file = "nltk-3.8.1.zip", hash = "sha256:1834da3d0682cba4f2cede2f9aad6b0fafb6461ba451db0efb6f9c39798d64d3"},
+]
+
+[package.dependencies]
+click = "*"
+joblib = "*"
+regex = ">=2021.8.3"
+tqdm = "*"
+
+[package.extras]
+all = ["matplotlib", "numpy", "pyparsing", "python-crfsuite", "requests", "scikit-learn", "scipy", "twython"]
+corenlp = ["requests"]
+machine-learning = ["numpy", "python-crfsuite", "scikit-learn", "scipy"]
+plot = ["matplotlib"]
+tgrep = ["pyparsing"]
+twitter = ["twython"]
+
+[[package]]
 name = "notebook"
 version = "7.2.1"
 description = "Jupyter Notebook - A web-based notebook environment for interactive computing"
@@ -3316,6 +3380,17 @@ typing = ["typing-extensions"]
 xmp = ["defusedxml"]
 
 [[package]]
+name = "pivottablejs"
+version = "0.9.0"
+description = "PivotTable.js integration for Jupyter/IPython Notebook"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pivottablejs-0.9.0-py2.py3-none-any.whl", hash = "sha256:106dd59a81248664001a952c533aa73de532908b7a6a94e87cb7c39f113ad792"},
+    {file = "pivottablejs-0.9.0.tar.gz", hash = "sha256:9f0f9f692330f2f635dc37f05ad99da84646e4f3dbf9fe849cf6889de4b3210b"},
+]
+
+[[package]]
 name = "platformdirs"
 version = "4.2.2"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
@@ -3330,6 +3405,21 @@ files = [
 docs = ["furo (>=2023.9.10)", "proselint (>=0.13)", "sphinx (>=7.2.6)", "sphinx-autodoc-typehints (>=1.25.2)"]
 test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.4.3)", "pytest-cov (>=4.1)", "pytest-mock (>=3.12)"]
 type = ["mypy (>=1.8)"]
+
+[[package]]
+name = "plotly"
+version = "5.23.0"
+description = "An open-source, interactive data visualization library for Python"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "plotly-5.23.0-py3-none-any.whl", hash = "sha256:76cbe78f75eddc10c56f5a4ee3e7ccaade7c0a57465546f02098c0caed6c2d1a"},
+    {file = "plotly-5.23.0.tar.gz", hash = "sha256:89e57d003a116303a34de6700862391367dd564222ab71f8531df70279fc0193"},
+]
+
+[package.dependencies]
+packaging = "*"
+tenacity = ">=6.2.0"
 
 [[package]]
 name = "pluggy"
@@ -4054,6 +4144,24 @@ files = [
 
 [package.dependencies]
 cffi = {version = "*", markers = "implementation_name == \"pypy\""}
+
+[[package]]
+name = "qgrid"
+version = "1.3.1"
+description = "An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook"
+optional = false
+python-versions = "*"
+files = [
+    {file = "qgrid-1.3.1.tar.gz", hash = "sha256:fe8af5b50833084dc0b6a265cd1ac7b837c03c0f8521150163560dce778d711c"},
+]
+
+[package.dependencies]
+ipywidgets = ">=7.0.0"
+notebook = ">=4.0.0"
+pandas = ">=0.18.0"
+
+[package.extras]
+test = ["flake8 (>=3.6.0)", "pytest (>=2.8.5)"]
 
 [[package]]
 name = "qtconsole"
@@ -4934,6 +5042,27 @@ develop = ["colorama", "cython (>=0.29.33)", "cython (>=3.0.10,<4)", "flake8", "
 docs = ["ipykernel", "jupyter-client", "matplotlib", "nbconvert", "nbformat", "numpydoc", "pandas-datareader", "sphinx"]
 
 [[package]]
+name = "suod"
+version = "0.1.3"
+description = "A Scalable Framework for Unsupervised Outlier Detection (Anomaly Detection)"
+optional = false
+python-versions = "*"
+files = [
+    {file = "suod-0.1.3.tar.gz", hash = "sha256:d8ef15f00ba463f6a4cfc35889d237932512f534b1bea863ed9a42aa58e7379d"},
+]
+
+[package.dependencies]
+combo = "*"
+joblib = ">=0.14.1"
+matplotlib = "*"
+numpy = ">=1.13"
+pandas = "*"
+psutil = "*"
+pyod = ">=1.0"
+scikit_learn = ">=1.0"
+scipy = ">=0.19.1"
+
+[[package]]
 name = "sympy"
 version = "1.13.1"
 description = "Computer algebra system (CAS) in Python"
@@ -4962,6 +5091,21 @@ files = [
     {file = "tbb-2021.13.0-py3-none-win32.whl", hash = "sha256:6669d26703e9943f6164c6407bd4a237a45007e79b8d3832fe6999576eaaa9ef"},
     {file = "tbb-2021.13.0-py3-none-win_amd64.whl", hash = "sha256:3528a53e4bbe64b07a6112b4c5a00ff3c61924ee46c9c68e004a1ac7ad1f09c3"},
 ]
+
+[[package]]
+name = "tenacity"
+version = "9.0.0"
+description = "Retry code until it succeeds"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "tenacity-9.0.0-py3-none-any.whl", hash = "sha256:93de0c98785b27fcf659856aa9f54bfbd399e29969b0621bc7f762bd441b4539"},
+    {file = "tenacity-9.0.0.tar.gz", hash = "sha256:807f37ca97d62aa361264d497b0e31e92b8027044942bfa756160d908320d73b"},
+]
+
+[package.extras]
+doc = ["reno", "sphinx"]
+test = ["pytest", "tornado (>=4.5)", "typeguard"]
 
 [[package]]
 name = "terminado"
@@ -6119,4 +6263,4 @@ unicode = ["tangled-up-in-unicode (==0.2.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.2"
-content-hash = "e1673f1a113d8208cc9532b6a70c04994a635432fc9b345abd2cd4eeb65815b6"
+content-hash = "a793911144681084dd1a7610454e819e07abf6d45fcedc9aea1111d0e5d104c6"
