@@ -1,4 +1,4 @@
-# Distribution Shift Scoring Methods
+# Data drift methods
 
 Quantify deviations of a sample from the training distribution to detect and adapt to data changes impacting model performance.
 

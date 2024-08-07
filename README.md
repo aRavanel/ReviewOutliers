@@ -1,20 +1,25 @@
 # Outlier and distribution shift
 
-Identify outliers and shift
+Identify outliers and shift. Can be used to :
+- Detect incorrect data
+- Detect extreme cases
+  - interesting / hard cases
+  - fraud
+  - ...
 
 ## Main files and folders in the repo
 
 Folders :
 
-- `data/`: contains xxx
-- `src/`: source code of utils functions
-
-Notebooks:
-
-- `01_data_exploration.ipynb`: xxx
-- `02_feature_engineering.ipynb`: xxx
-- `03_outlier_detection.ipynb`: xxx
-- `04_distribution_shift_scoring.ipynb`: xxx
+- `data/`: contains downloaded and processed data
+- `src/`: source code
+- `notebooks/`: for dowloading, processing, and launching the services
+  - `00_data_download.ipynb`: download wanted dataset
+  - `01_data_merge_and_splitting.ipynb`: merge and choose splitting method
+  - `02_data_exploration.ipynb`: automatic and manual exploration
+  - `03_clean_enrich_encode.ipynb`: enrich and encode data. save the encoders
+  - `04_outlier_and_shift.ipynb`: run and analyze some data
+  - `05_model_serving.ipynb`: launch the services (uvicorn or docker)
 
 ## Set-up
 
@@ -45,10 +50,18 @@ cat <<EOL >> .vscode/settings.json
 {
     "python.formatting.provider": "black",
     "python.linting.enabled": true,
-    "python.linting.flake8Enabled": false,
+    "python.linting.flake8Enabled": true,
     "python.linting.ruffEnabled": true,
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "notebook.defaultFormatter": "ms-python.flake8",
+    "flake8.args": ["--max-line-length=128"],
+    "python.languageServer": "Pylance",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.useLibraryCodeForTypes": true,
 }
+
 EOL
 ```
 
@@ -79,44 +92,8 @@ make run_docker
 
 The API available at: `http://localhost:8000`.
 Documentation at: `http://localhost:8000/docs`.
-
-- `GET /api/reviews`: Retrieves all reviews.
-- `POST /api/reviews`: Creates a new review.
-- `GET /api/reviews/{user_id}`: Retrieves a review by user ID.
-- `PUT /api/reviews/{user_id}`: Updates a review by user ID.
-- `DELETE /api/reviews/{user_id}`: Deletes a review by user ID.
 - `POST /api/detect_outliers`: Detects if a given sample is an outlier.
-- `POST /api/distribution_shift`: Computes the distribution shift score for a given sample.
-
-### make a request
-
-1. Using shell:
-```bash
-curl -X 'POST' \
-  'http://localhost:8000/api/detect_outliers' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "text": "string",
-  "features": [
-    0
-  ]
-}'
-```
-2. Using HTTPie : `http POST http://localhost:8000/api/detect_outliers text="string" features:=[0]`
-3. Using python requests:
-```python
-import requests
-url = "http://localhost:8000/api/detect_outliers"
-payload = {"text": "string", "features": [0]}
-headers = {
-    "accept": "application/json",
-    "Content-Type": "application/json"
-}
-response = requests.post(url, json=payload, headers=headers)
-print(response.json())
-```
-4. Other tools : Postman, swagger docs, ...
+- `POST /api/distribution_shift`: Computes the distribution shift score
 
 ## Contribute
 
@@ -139,11 +116,11 @@ Or use Make :
 
 Functionalities:
 
-- [ ] Dataset selection
-- [ ] Outlier detection
-- [ ] Distribution shift scoring
-- [ ] Model serving
-- [ ] Documentation
+- [x] Dataset selection
+- [x] Outlier detection
+- [x] Distribution shift scoring
+- [x] Model serving
+- [x] Documentation
 
 
 # Resources : 
