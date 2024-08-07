@@ -8,7 +8,7 @@ from src.api.utils import BatchDetectionRequest, convert_requests_to_dataframe
 # ==========================================================================
 # module variables and classes
 # ==========================================================================
-router = APIRouter()
+outlier_router = APIRouter()
 
 
 # Pydantic Schema for Outliers
@@ -25,7 +25,7 @@ class BatchOutlierDetectionResponse(BaseModel):
 # ==========================================================================
 
 
-@router.post("/detect_outliers", response_model=BatchOutlierDetectionResponse)
+@outlier_router.post("/detect_outliers", response_model=BatchOutlierDetectionResponse)
 def detect_outliers(request: BatchDetectionRequest) -> BatchOutlierDetectionResponse:
     """
     Detect outliers in a batch of data.
@@ -43,8 +43,7 @@ def detect_outliers(request: BatchDetectionRequest) -> BatchOutlierDetectionResp
     df = convert_requests_to_dataframe(request.requests)
 
     # Log the dataframe used
-    logger.debug("df used :")
-    logger.debug(df)
+    logger.debug("df used:\n%s", df)
 
     # Perform outlier detection
     list_outlier = outlier_prediction(df, training=False)

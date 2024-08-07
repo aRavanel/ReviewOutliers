@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Any, Dict, Optional
+from typing import List, Any, Dict, Union
 from datetime import datetime
 import pandas as pd
 from src.config import logger
@@ -7,23 +7,22 @@ from src.config import logger
 
 # Common Pydantic Schema
 class DetectionRequest(BaseModel):
-    user_id: Optional[str] = None
-    title_review: Optional[str] = "No title"
-    text: Optional[str] = "No text"
-    title_metadata: Optional[str] = "No title"
-    features: Optional[str] = ""
-    description: Optional[str] = ""
-    main_category: Optional[str] = "unknown"
-    store: Optional[str] = "unknown"
-    asin: Optional[str] = None
-    parent_asin: Optional[str] = None
-    timestamp: Optional[str] = datetime(1970, 1, 1).isoformat()
-    rating: Optional[int] = 0
-    average_rating: Optional[float] = 0.0
-    price: Optional[float] = -1.0
-    helpful_vote: Optional[int] = 0
-    verified_purchase: Optional[bool] = False
-    rating_number: Optional[int] = 0
+    user_id: str = "-1"
+    title_review: str = ""
+    text: str = ""
+    title_metadata: str = ""
+    features: List[str] = []
+    description: List[str] = []
+    store: str = "unknown"
+    asin: str = "-1"
+    parent_asin: str = "-1"
+    timestamp: Union[int, str, float] = datetime(1970, 1, 1).isoformat()
+    rating: int = 0
+    average_rating: float = 0.0
+    price: float = -1.0
+    helpful_vote: int = 0
+    verified_purchase: bool = False
+    rating_number: int = 0
 
 
 class BatchDetectionRequest(BaseModel):

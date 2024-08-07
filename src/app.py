@@ -1,14 +1,16 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 
 # module imports
-from src.api import outlier_detection, distribution_shift
-from src.config import logger
+from src.api.outlier_detection import outlier_router
+from src.api.distribution_shift import shift_router
 
 # ==========================================================================
 # Module variables
 # ==========================================================================
+from src.config import logger
 
 # Create a FastAPI application
 app = FastAPI(
@@ -28,24 +30,24 @@ app.add_middleware(
 )
 
 # Include the routers for different endpoints with appropriate prefixes
-app.include_router(outlier_detection.router, prefix="/api/detect_outliers")
-app.include_router(distribution_shift.router, prefix="/api/distribution_shift")
+app.include_router(outlier_router, prefix="/anomaly", tags=["anomaly-detection"])
+app.include_router(shift_router, prefix="/anomaly", tags=["anomaly-detection"])
 
 # ==========================================================================
 # util functions
 # ==========================================================================
 
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    logger.error(f"Validation error: {exc.errors()}", exc_info=exc)
+    return JSONResponse(status_code=400, content={"message": "Validation error", "details": exc.errors()})
+
+
 @app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    """
-    Global exception handler to catch and log all exceptions.
-    """
-    logger.error(f"An error occurred: {exc}")
-    return JSONResponse(
-        status_code=500,
-        content={"message": "An internal server error occurred."},
-    )
+async def unhandled_exception_handler(request, exc):
+    logger.error(f"Unhandled error: {str(exc)}", exc_info=exc)
+    return JSONResponse(status_code=500, content={"message": "An internal server error occurred."})
 
 
 # ==========================================================================

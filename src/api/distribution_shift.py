@@ -9,7 +9,7 @@ from src.api.utils import BatchDetectionRequest, convert_requests_to_dataframe
 # module variables and classes
 # ==========================================================================
 
-router = APIRouter()
+shift_router = APIRouter()
 
 
 # Pydantic Schema for Distribution Shift
@@ -26,7 +26,7 @@ class BatchDistributionShiftResponse(BaseModel):
 # ==========================================================================
 
 
-@router.post("/distribution_shift", response_model=BatchDistributionShiftResponse)
+@shift_router.post("/distribution_shift", response_model=BatchDistributionShiftResponse)
 def distribution_shift(request: BatchDetectionRequest) -> BatchDistributionShiftResponse:
     """
     Calculates the distribution shift scores for a batch of data.
