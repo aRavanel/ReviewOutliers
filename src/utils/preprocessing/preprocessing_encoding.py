@@ -6,13 +6,11 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
-# module imports
-from src.config import logger
-
 # ==========================================================================
 # Module variables
 # ==========================================================================
 from src.config import (
+    logger,
     MODEL_PATH_STANDARDIZER,
     BASE_PATH_MODEL,
 )
@@ -39,6 +37,15 @@ def load_encoder(file_name: str) -> Any:
     except IOError as e:
         logger.error(f"Error loading encoder from {file_name}: {e}")
         return None
+
+
+def _diminish_columns_numerical(data: np.ndarray, numerical_features: List[str], column_list: List[str]) -> np.ndarray:
+    """Diminish the importance of specified columns in numerical features."""
+    for col in column_list:
+        if col in numerical_features:
+            idx = numerical_features.index(col)
+            data[:, idx] /= len(column_list)
+    return data
 
 
 def encode_features(merged_df: pd.DataFrame, training: bool = True) -> np.ndarray:
@@ -95,24 +102,15 @@ def encode_features(merged_df: pd.DataFrame, training: bool = True) -> np.ndarra
     )
 
     # Diminish importance of specified columns in numerical features
-    def diminish_columns_numerical(x_numerical_standardized, column_list: List[str]):
-        for col in column_list:
-            if col in numerical_features:
-                idx = numerical_features.index(col)
-                x_numerical_standardized[:, idx] /= len(column_list)
-        return x_numerical_standardized
-
-    x_numerical_standardized = diminish_columns_numerical(x_numerical_standardized, ["year", "month", "day", "hour"])
-    x_numerical_standardized = diminish_columns_numerical(
-        x_numerical_standardized, ["sentiment_score", "similarity_good", "similarity_bad", "similarity_expensive"]
-    )
-    x_numerical_standardized = diminish_columns_numerical(x_numerical_standardized, ["similarity_scam", "similarity_error"])
-    x_numerical_standardized = diminish_columns_numerical(
-        x_numerical_standardized, ["readability", "length_char", "length_word"]
-    )
-    x_numerical_standardized = diminish_columns_numerical(
-        x_numerical_standardized, ["rating", "rating_deviation", "average_rating"]
-    )
+    diminish_columns = [
+        ["year", "month", "day", "hour"],
+        ["sentiment_score", "similarity_good", "similarity_bad", "similarity_expensive"],
+        ["similarity_scam", "similarity_error"],
+        ["readability", "length_char", "length_word"],
+        ["rating", "rating_deviation", "average_rating"],
+    ]
+    for columns in diminish_columns:
+        x_numerical_standardized = _diminish_columns_numerical(x_numerical_standardized, numerical_features, columns)
 
     return np.hstack((x_numerical_standardized, x_categorical_scaled))
 

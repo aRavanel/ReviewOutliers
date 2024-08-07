@@ -26,12 +26,16 @@ nltk.download("vader_lexicon")
 
 def clean_enrich(df_in: pd.DataFrame, saved_name: str = "") -> pd.DataFrame:
     """
-    check here :
-    https://github.com/yashpandey474/Identification-of-fake-reviews/blob/main/Code/Data_Processing/Feature_Extraction.py
-    https://iacis.org/iis/2020/1_iis_2020_185-194.pdf
-    https://www.sciencedirect.com/science/article/abs/pii/S0167923622001828
+    Clean and enrich the input DataFrame.
 
+    Args:
+        df_in (pd.DataFrame): Input DataFrame.
+        saved_name (str, optional): Path to save enriched DataFrame. Defaults to "".
+
+    Returns:
+        pd.DataFrame: Enriched DataFrame.
     """
+    """ """
 
     logger.debug("calling clean_enrich")
 
@@ -90,11 +94,15 @@ def clean_enrich(df_in: pd.DataFrame, saved_name: str = "") -> pd.DataFrame:
 
     # Enrich textual data with
     # -----------------------
+
     # Compute embeddings
+    logger.debug("computing review embeddings")
     review_embeddings = model_embeddings.encode(df["text_review"].tolist(), show_progress_bar=True)
+
+    logger.debug("computing metadata embeddings")
     metadata_embeddings = model_embeddings.encode(df["text_metadata"].tolist(), show_progress_bar=True)
 
-    # VADER Sentiment Score
+    # VADER Sentiment Score : from -1 (negative) to 1 (positive)
     sid = SentimentIntensityAnalyzer()
     df["sentiment_score"] = df["text_review"].apply(lambda d: sid.polarity_scores(d)["compound"])
 
@@ -110,15 +118,12 @@ def clean_enrich(df_in: pd.DataFrame, saved_name: str = "") -> pd.DataFrame:
     for k, v in sentiment_embeddings.items():
         df[f"similarity_{k}"] = np.dot(review_embeddings, v.T).flatten()
 
-    # Compute mean of several readability scores
-    # df["flesch_kincaid"] = df["text_review"].apply(flesch_kincaid_grade)
-    # df["gunning_fog"] = df["text_review"].apply(gunning_fog)
+    # Compute mean of several readability scores (possibilities : flesch_reading_ease, flesch_kincaid, gunning_fog, ...)
     df["readability"] = df["text_review"].apply(flesch_reading_ease) / 100  # scale 0 - 100 with 100 easy to read
 
-    # Length-based features
+    # Length-based features (possibilities : char, word, sentence)
     df["length_char"] = df["text_review"].apply(len)
     df["length_word"] = df["text_review"].apply(lambda x: len(x.split()))
-    # df["length_sentence"] = df["text_review"].apply(lambda x: len(x.split(".")))
 
     # Interaction features
     df["interaction_score"] = np.dot(review_embeddings, metadata_embeddings.T).diagonal()

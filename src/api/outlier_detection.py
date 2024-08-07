@@ -5,7 +5,7 @@ from datetime import datetime
 import pandas as pd
 
 # module imports
-from src.tasks.outliers import outlier_detection
+from src.tasks.outliers_and_shift import outlier_prediction
 from src.config import logger
 import logging
 
@@ -131,7 +131,7 @@ def detect_outliers(request: BatchOutlierDetectionRequest) -> BatchOutlierDetect
     logger.debug(df)
 
     # run the outlier algorithm
-    list_outlier, list_score = outlier_detection(df, training=False)
+    list_outlier, list_score = outlier_prediction(df, training=False)
 
     # format the output data to have valid output format
     results = [

@@ -7,10 +7,15 @@ import logging.config
 # ==========================================================================
 
 # text embeddings model from sentence transformers
-# - "all-MiniLM-L6-v2"  # ranked 117 dim : 384, max_len : 256
-# - "dunzhang/stella_en_400M_v5"  # ranked 6th
 # - "dunzhang/stella_en_1.5B_v5"  # ranked 2th
-MODEL_NAME_EMBEDDINGS = "Alibaba-NLP/gte-large-en-v1.5"  # ranked 21
+# - "dunzhang/stella_en_400M_v5"  # ranked 6th
+# - "Alibaba-NLP/gte-large-en-v1.5"  # ranked 21
+# - "BAAI/bge-large-en-v1.5"
+# - "Alibaba-NLP/gte-base-en-v1.5"  # good compromise
+# - "BAAI/bge-small-en-v1.5"
+# - "all-MiniLM-L6-v2"  # ranked 117 dim : 384, max_len : 256
+MODEL_NAME_EMBEDDINGS = "Alibaba-NLP/gte-base-en-v1.5"  # ranked 21
+
 
 # outlier model name from pyod
 MODEL_NAME_OUTLIER = "one-class-svm"  # "one-class-svm", "isolation_forest", "ensemble"

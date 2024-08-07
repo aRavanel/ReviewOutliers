@@ -1,7 +1,7 @@
 import os
 
 # module imports
-from src.utils.io import load_dataframe
+from src.utils.io.io import load_dataframe
 from src.config import BASE_PATH_DATA
 from src.utils.preprocessing.preprocessing import preprocess_data
 

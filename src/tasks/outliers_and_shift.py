@@ -41,22 +41,25 @@ def _load_model_outlier():
         raise e
 
 
-# ==========================================================================
-# Exported functions
-# ==========================================================================
-def outlier_prediction(
+def outlier_shift_computation(
     df: pd.DataFrame, training: bool = True, outlier_on_score: bool = True, contamination: float = 0.1
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Predict outliers and compute scores for the test set.
-    Notes :
-    - Train the Isolation Forest model on the training set and optionally save it.
-    - scores > 0   ->   outlier
-    - contamination of 0.1 -> expect 10% of outliers
+    if training = True, train the model and save it
+
+    PYOD :
+    scores : the higher the more anomalous the sample is
+    labels_ : 0 for inliers, 1 for outliers
+
+    SKLEARN :
+    scores :
+    - Negative scores represent outliers (the lower the more abnormal),
+    - positive scores represent inliers. from -0.5 to 0.5
+    labels_ :-1 for outliers, 1 for inliers
     """
     logger.debug("calling outlier_prediction")
 
-    # outlier detection
     if training:
         match MODEL_NAME_OUTLIER:
 
@@ -99,18 +102,75 @@ def outlier_prediction(
     return np.array(outliers), scores
 
 
-def outlier_detection(df: pd.DataFrame, training: bool = True) -> Tuple[np.ndarray, np.ndarray]:
+# ==========================================================================
+# Exported functions
+# ==========================================================================
+def outlier_shift_prediction(df: pd.DataFrame, training: bool = True) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Train the Isolation Forest model on the training set and optionally save it.
-    scores > 0   ->   outlier
-    Predict outliers and compute scores for the test set.
-    """
-    logger.debug("calling outlier_detection")
+    Preprocesses the data and performs outlier and shift detection.
+    """ """
+    logger.debug("calling outlier_shift_prediction")
 
-    # clean, enrich, encode the data. TODO : have one specific preprocessing per model
+    Args:
+        df (pd.DataFrame): The input data.
+        training (bool, optional): Flag indicating whether the data is in training mode.
+            Defaults to True.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: The outlier labels and shift scores for each data point.
+    """
+    logger.debug("Preprocessing the data")
+
+    # clean, enrich, encode the data.
     df = preprocess_data(df, training=False)
 
-    # do the prediction
-    outliers, scores = outlier_prediction(df, training)
+    # Perform outlier and shift detection
+    outliers, scores = outlier_shift_computation(df, training)
 
     return outliers, scores
+
+
+def outlier_prediction(df: pd.DataFrame, training: bool = True) -> np.ndarray:
+    """
+    Detects outliers in the data using the outlier detection model.
+
+    Args:
+        df (pd.DataFrame): The input data.
+        training (bool, optional): Flag indicating whether the data is in training mode.
+            Defaults to True.
+
+    Returns:
+        np.ndarray: The outlier labels for each data point.
+    """
+
+    logger.debug("calling outlier_prediction")
+
+    # Clean, enrich, encode the data
+    df = preprocess_data(df, training=False)
+
+    # Perform outlier detection
+    outliers, _ = outlier_shift_computation(df, training)
+
+    return outliers
+
+
+def shift_detection(df: pd.DataFrame, training: bool = True) -> np.ndarray:
+    """
+    Detects shifts in the data using the outlier detection model.
+
+    Args:
+        df (pd.DataFrame): The input data.
+        training (bool, optional): Flag indicating whether the data is in training mode. Defaults to True.
+
+    Returns:
+        np.ndarray: The shift scores for each data point.
+    """
+    logger.debug("calling shift_detection")
+
+    # Clean, enrich, encode the data.
+    df = preprocess_data(df, training=False)
+
+    # Do the prediction
+    _, scores = outlier_shift_computation(df, training)
+
+    return scores
