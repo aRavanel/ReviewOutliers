@@ -20,6 +20,9 @@ Folders :
   - `03_clean_enrich_encode.ipynb`: enrich and encode data. save the encoders
   - `04_outlier_and_shift.ipynb`: run and analyze some data
   - `05_model_serving.ipynb`: launch the services (uvicorn or docker)
+- `logs/`:
+  - `uvicorn.log`: logs of the uvicorn server
+  - `app.log`: logs of the fastAPI app
 
 ## Set-up
 
@@ -92,8 +95,6 @@ make run_docker
 
 The API available at: `http://localhost:8000`.
 Documentation at: `http://localhost:8000/docs`.
-- `POST /api/detect_outliers`: Detects if a given sample is an outlier.
-- `POST /api/distribution_shift`: Computes the distribution shift score
 
 ## Contribute
 
@@ -117,10 +118,18 @@ Or use Make :
 Functionalities:
 
 - [x] Dataset selection
-- [x] Outlier detection
+- [x] Basic data exploration 
+- [x] Data cleaning, enrichment and encoding
+- [x] Outlier detection + some clustering for analysis
 - [x] Distribution shift scoring
 - [x] Model serving
 - [x] Documentation
+- [ ] using categories features
+- [ ] better data imputation (rather than dummy values)
+- [ ] using more specific models for sentiment analysis
+- [ ] more analysis on outlier results
+- [ ] creating a data drift endpoint using js, kl, psi methods
+
 
 
 # Resources : 
