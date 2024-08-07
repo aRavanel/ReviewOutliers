@@ -3,7 +3,7 @@ import os
 # module imports
 from src.utils.io.io import load_dataframe
 from src.config import BASE_PATH_DATA
-from src.tasks.outliers_and_shift import outlier_prediction
+from src.tasks.outliers_and_shift import outlier_shift_prediction
 
 # ==========================================================================
 # Module variables
@@ -22,7 +22,7 @@ def test_outlier_detection_inference() -> None:
     """
     Basic test to see if outlier detection runs
     """
-    outliers, scores = outlier_prediction(df_test, training=False)
+    outliers, scores = outlier_shift_prediction(df_test, training=False)
 
     assert outliers.shape[0] == n_data
     assert scores.shape[0] == n_data
