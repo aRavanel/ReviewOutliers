@@ -48,16 +48,22 @@ def clean_enrich(df_in: pd.DataFrame, saved_name: str = "") -> pd.DataFrame:
     df["day"] = df["timestamp"].dt.day
     df["hour"] = df["timestamp"].dt.hour
 
-    # User based rating
-    average_ratings_user = df.groupby("user_id")["rating"].mean()
-    count_ratings_user = df.groupby("user_id")["rating"].count()
-    df["average_rating_user"] = df["user_id"].map(average_ratings_user)
-    df["count_rating_user"] = df["user_id"].map(count_ratings_user)
-    df["rating_deviation"] = abs(df["average_rating"] - df["average_rating_user"])
+    if len(df) > 1:
+        # User based rating
+        average_ratings_user = df.groupby("user_id")["rating"].mean()
+        count_ratings_user = df.groupby("user_id")["rating"].count()
+        df["average_rating_user"] = df["user_id"].map(average_ratings_user)
+        df["count_rating_user"] = df["user_id"].map(count_ratings_user)
+        df["rating_deviation"] = abs(df["average_rating"] - df["average_rating_user"])
 
-    # total number of reviews
-    num_reviews = df.groupby("asin").size()
-    df["num_reviews"] = df["asin"].map(num_reviews)
+        # Total number of reviews
+        num_reviews = df.groupby("asin").size()
+        df["num_reviews"] = df["asin"].map(num_reviews)
+    else:
+        df["average_rating_user"] = df["rating"]
+        df["count_rating_user"] = 1
+        df["rating_deviation"] = abs(df["average_rating"] - df["average_rating_user"])
+        df["num_reviews"] = 1
 
     # Handle missing values - categories
     df["main_category"] = df["main_category"].fillna("unknown").astype("category")
@@ -130,7 +136,6 @@ def clean_enrich(df_in: pd.DataFrame, saved_name: str = "") -> pd.DataFrame:
 
     # Features to keep
     features_to_keep = [
-        "main_category",
         "store",
         "average_rating",
         "year",
@@ -155,6 +160,7 @@ def clean_enrich(df_in: pd.DataFrame, saved_name: str = "") -> pd.DataFrame:
         "readability",
     ]
     # features removed :
+    # - main_category : trained on a single category
     # - not generalizable: userid, asin, parent_asin
     # - empty : verified_purchase
     # - processed : timestamp,

@@ -14,7 +14,9 @@ import logging.config
 # - "Alibaba-NLP/gte-base-en-v1.5"  # good compromise
 # - "BAAI/bge-small-en-v1.5"
 # - "all-MiniLM-L6-v2"  # ranked 117 dim : 384, max_len : 256
-MODEL_NAME_EMBEDDINGS = "Alibaba-NLP/gte-base-en-v1.5"  # ranked 21
+
+MODEL_NAME_EMBEDDINGS = "all-MiniLM-L6-v2"
+# MODEL_NAME_EMBEDDINGS = "Alibaba-NLP/gte-base-en-v1.5"  # ranked 21
 
 
 # outlier model name from pyod

@@ -42,7 +42,7 @@ def _load_model_outlier():
 
 
 def outlier_shift_computation(
-    df: pd.DataFrame, training: bool = True, outlier_on_score: bool = True, contamination: float = 0.1
+    df: pd.DataFrame, training: bool = True, outlier_on_score: bool = False, contamination: float = 0.001
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Predict outliers and compute scores for the test set.
@@ -70,6 +70,7 @@ def outlier_shift_computation(
                 model = OCSVM(kernel="rbf", contamination=contamination)
 
             case "ensemble":
+
                 # initialized a group of outlier detectors for acceleration
                 detector_list = [LOF(n_neighbors=15), LOF(n_neighbors=20), COPOD(), IForest(n_estimators=100)]
 
@@ -122,7 +123,7 @@ def outlier_shift_prediction(df: pd.DataFrame, training: bool = True) -> Tuple[n
     logger.debug("Preprocessing the data")
 
     # clean, enrich, encode the data.
-    df = preprocess_data(df, training=False)
+    # Note df is considered already clean for this function
 
     # Perform outlier and shift detection
     outliers, scores = outlier_shift_computation(df, training)

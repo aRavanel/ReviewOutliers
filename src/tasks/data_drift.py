@@ -20,9 +20,9 @@ from src.utils.maths.divergence_metrics import (
 # ==========================================================================
 
 
-def distribution_shift_scoring(initial_distribution, samples: np.ndarray, method: str = "psi") -> float:
+def data_drift_scoring(initial_distribution, samples: np.ndarray, method: str = "psi") -> float:
     """
-    Calculates the distribution shift score using the specified method.
+    Calculates the data drift score using the specified method.
 
     Parameters:
     - samples (np.ndarray): Array of sample data.
@@ -36,7 +36,7 @@ def distribution_shift_scoring(initial_distribution, samples: np.ndarray, method
     if method not in {"psi", "ks"}:
         raise ValueError("Method must be either 'psi' or 'ks'.")
 
-    # compute the distribution shfit scores
+    # compute the data drift
     if method == "psi":
         score = psi(initial_distribution, samples)
 
